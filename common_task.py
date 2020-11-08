@@ -16,7 +16,6 @@ def initialize(simulate =False,**kwarg):
     initialize is already built into load_deck(deck_plan).
     don't need to specifically use initialize.
     """
-    simulate = 1
     metadata = {
         'protocolName': 'Saliva to DTT',
         'apiLevel': '2.7'
