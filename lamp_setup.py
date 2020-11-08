@@ -3,8 +3,10 @@ If you need to control gpios, first stop the robot server with systemctl stop op
 """
 
 from opentrons import protocol_api
-import opentrons.execute # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
+# This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
 import json,timeit,time
+import common_task as ct
+
 
 def _log_time(start_time,event = 'This step',print_log=1):
     stop = timeit.default_timer()
@@ -15,19 +17,19 @@ def _log_time(start_time,event = 'This step',print_log=1):
     print (log) if print_log else 1
     return run_time,log
 
-def heating(tm_deck,temp = 95, heat_time = 5):
-    """Set the temperature to temp, then heat for time (5) minutes
-    lower the temperature to 37C and deactivate the temp deck"""
-    import timeit,heat_time
-    temp,heat_time = temp,heat_time
-    start = timeit.default_timer()
-    tm_deck.set_temperature(temp)
-    ramp_time = timeit.default_timer() - start
-    time.sleep(heat_time*60)
-    tm_deck.set_temperature(25)
-    tm_deck.deactivate()
+# def heating(tm_deck,temp = 95, heat_time = 5):
+#     """Set the temperature to temp, then heat for time (5) minutes
+#     lower the temperature to 37C and deactivate the temp deck"""
+#     import timeit,heat_time
+#     temp,heat_time = temp,heat_time
+#     start = timeit.default_timer()
+#     tm_deck.set_temperature(temp)
+#     ramp_time = timeit.default_timer() - start
+#     time.sleep(heat_time*60)
+#     tm_deck.set_temperature(25)
+#     tm_deck.deactivate()
 
-def multi_transfer(s,d, b = 0,samp_vol= 100,air_vol = 25, buffer_vol = 0,simulate = False,get_time = 0):
+# def multi_transfer(s,d, b = 0,samp_vol= 100,air_vol = 25, buffer_vol = 0,simulate = False,get_time = 0):
     """ buffer_well
     s: source well
     d: destination well
@@ -81,14 +83,14 @@ saliva_rack = json.loads(LABWARE_DEF_JSON)
 LABWARE_LABEL = saliva_rack.get('metadata', {}).get(
     'displayName', 'test labware')
 
-metadata = {
-    'protocolName': 'Saliva to DTT',
-    'apiLevel': '2.7'
-}
+# metadata = {
+#     'protocolName': 'Saliva to DTT',
+#     'apiLevel': '2.1'
+# }
 
 
-protocol = opentrons.execute.get_protocol_api('2.7')
-
+# protocol = opentrons.execute.get_protocol_api('2.7')
+protocol = ct.initialize()
 
 
 # load labware and pipettes
@@ -101,7 +103,7 @@ left_pip_name = "p300_multi"
 plate_name = 'nest_96_wellplate_100ul_pcr_full_skirt'
 plate_slot ="7"
 lampMM_plate_slot = '8'
-dtt_slot = "2"
+dtt_slot = "1"
 rack_name = saliva_rack
 rack_slots = ["5","6"]
 temp_module_slot = '9'
@@ -125,42 +127,36 @@ else:
     dest_plate = protocol.load_labware(plate_name, temp_module_slot)
 
 
-# set pipette parameters
-multi_pipette.flow_rate.aspirate = 120
-multi_pipette.flow_rate.dispense = 120
-tip_press_increment=0.4
-tip_presses = 1
 
 
 # sample info
-samp_vol = 100
+samp_vol = 50
+disp = 2
 buffer_vol = int(samp_vol/4)
 air_vol = 20
-total_vol = samp_vol+buffer_vol+air_vol
 samples = 48
 
 
 
 start_all = timeit.default_timer()
-samples = 4
 sample_c = int((samples-1)/4)+1
 wells = []
 incubation_start_times =[]
 for s, d,b in zip(src_tubes[:sample_c],dest_plate.rows()[0][:sample_c],dtt_plate.rows()[0][:sample_c]):
     print ("Start transfering Saliva to 96 well plate")
-    run_time,well,incubation_start_time = multi_transfer(s,d,b,buffer_vol=0,get_time=1)
+    run_time,well,incubation_start_time = ct.p_transfer(multi_pipette,s,d,b,samp_vol = samp_vol,buffer_vol=0,get_time=1,disp=disp,mix=0)
     wells.append(well)
     incubation_start_times.append(incubation_start_time)
     print ("Total transfer time for 4 samples is {} second".format(run_time))
 
-for s,d,t in zip(wells,lampMM_plate.rows()[0][:len(wells)],incubation_start_times):
-    start = timeit.default_timer()
-    t0 = start-t
-    print ("Sample already on hot plate for {} minutes.".format(t0/60))
-    if t0 >300:
-        print ("Sample already on hot plate for {} minutes.".format(t0/60))
-    else:
-        time.sleep(300-t0)
-    multi_transfer(s,d)
+# for s,d,t in zip(wells,lampMM_plate.rows()[0][:len(wells)],incubation_start_times):
+#     start = timeit.default_timer()
+#     t0 = start-t
+#     print ("Sample already on hot plate for {} minutes.".format(t0/60))
+#     if t0 >300:
+#         print ("Sample already on hot plate for {} minutes.".format(t0/60))
+#     else:
+#         time.sleep(300-t0)
+#     multi_transfer(s,d)
 
 _log_time(start_all, 'Total run time for {} columns'.format(sample_c))
