@@ -18,7 +18,6 @@ def initialize(simulate =False,**kwarg):
     """
     metadata = {
         'protocolName': 'Saliva to DTT',
-        'apiLevel': '2.7'
     }
 
     from opentrons import protocol_api
@@ -32,17 +31,39 @@ def initialize(simulate =False,**kwarg):
         protocol = opentrons.simulate.get_protocol_api('2.1')
     else:
         import opentrons.execute # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
-        protocol = opentrons.execute.get_protocol_api('2.7')
+        protocol = opentrons.execute.get_protocol_api('2.1')
     protocol = protocol
     protocol.home()
     return protocol
 
-def load_deck(deck_plan='default',simulate =False,**kwarg):
-    if deck_plan == 'default':
+def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
+    # if deck_plan == 'saliva_to_dtt_backup':
+    #     global p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
+    #     protocol = initialize(**kwarg)
+    #     p200_tip_name = "opentrons_96_filtertiprack_200ul"
+    #     p200_tip_slots = ["2","1"]
+    #     left_pip_name = "p300_multi"
+    #     plate_name = 'nest_96_wellplate_100ul_pcr_full_skirt'
+    #     plate_slot ="6"
+    #     rack_slots = ["3","9"]
+    #     trash_slot="5"
+    #     liquid_trash_rack=json.loads(lw.amsliquidtrash)
+    #     saliva_rack = json.loads(lw.ams2401)
+    #
+    #     p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+    #     src_racks = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
+    #     src_tubes = src_racks[0].rows()[0]+src_racks[1].rows()[0]
+    #     trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+    #     dest_plate = protocol.load_labware(plate_name, plate_slot)
+    #     multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
+    #     multi_pipette.drop_tips() if multi_pipette.has_tip else 1
+
+    if deck_plan == 'saliva_to_dtt':
+        # for 1 st rotation
         global p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
         protocol = initialize(**kwarg)
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
-        p200_tip_slots = ["2","10"]
+        p200_tip_slots = ["2","1"]
         left_pip_name = "p300_multi"
         plate_name = 'nest_96_wellplate_100ul_pcr_full_skirt'
         plate_slot ="6"
@@ -57,13 +78,39 @@ def load_deck(deck_plan='default',simulate =False,**kwarg):
         trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
         dest_plate = protocol.load_labware(plate_name, plate_slot)
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
+        multi_pipette.trash_container = trash
+        # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
+
+        #for 2nd rotation
+        global p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2,multi_pipette_2
+        p200_tip_name = "opentrons_96_filtertiprack_200ul"
+        p200_tip_slots = ["11"]
+        left_pip_name = "p300_multi"
+        plate_name = 'nest_96_wellplate_100ul_pcr_full_skirt'
+        plate_slot ="7"
+        rack_slots = ["4","10"]
+        trash_slot="8"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+        saliva_rack = json.loads(lw.ams2401)
+
+        p200_tips_2 = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+        src_racks_2 = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
+        src_tubes_2 = src_racks[0].rows()[0]+src_racks[1].rows()[0]
+        trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+        dest_plate_2 = protocol.load_labware(plate_name, plate_slot)
+        multi_pipette_2 = multi_pipette
+        multi_pipette_2.tip_racks = p200_tips_2
+        multi_pipette_2.trash_container = trash_2
+        # multi_pipette_2.drop_tips() if multi_pipette_2.has_tip else 1
+
 
 
 def p_dispense(pipette,well,volume,disp=1):
     """ Use pipette to perform multiple dispense
     volume: sample volume for each dispense
-    dis: dispense times
-    destination well by default is well + dis"""
+    disp: dispense times
+    destination well by default is shift well by 1 row each time for disp times.
+    E.g. First well is A1, then next is A"""
     def _next_row_well(w):
         """return the well in the next row. E.g. A1 well to B1 well"""
         p=w.parent
@@ -130,7 +177,8 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
         multi_pipette.return_tip()
         st = timeit.default_timer() if get_time else 1
     else:
-        multi_pipette.drop_tip()
+        multi_pipette.drop_tip(home_after=False)
+        multi_pipette.home()
         _log_time(st,event = 'Drop tip') if get_time else 1
         st = timeit.default_timer() if get_time else 1
     run_time = st - start
