@@ -60,3 +60,9 @@ multi_pipette_2.tip_racks = p200_tips_2
 multi_pipette_2.tip_racks
 protocol.cleanup()
 protocol.deck
+
+2%1
+2%2
+3%2
+4%2
+1%2
