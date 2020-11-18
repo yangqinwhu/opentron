@@ -37,10 +37,12 @@ def initialize(simulate =False,**kwarg):
     return protocol
 
 def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
+    global p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2
+    global p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
+
     if deck_plan == 'saliva_to_dtt':
         # for 1st shift
-        global p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
-        protocol = initialize(**kwarg)
+        protocol = initialize(simulate =simulate,**kwarg)
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
         p200_tip_slots = ["2","1"]
         left_pip_name = "p300_multi"
@@ -49,7 +51,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         rack_slots = ["3","9"]
         trash_slot="5"
         liquid_trash_rack=json.loads(lw.amsliquidtrash)
-        saliva_rack = json.loads(lw.ams2401)
+        saliva_rack = json.loads(lw.ams2402)
 
         p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
         src_racks = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
@@ -61,27 +63,67 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
         #for 2nd shift
-        global p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2,multi_pipette_2
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
-        p200_tip_slots = ["11"]
+        p200_tip_slots_2 = ["11"]
         left_pip_name = "p300_multi"
         plate_name = 'nest_96_wellplate_100ul_pcr_full_skirt'
         plate_slot ="7"
         rack_slots = ["4","10"]
-        trash_slot="8"
+        trash_slot_2="8"
         liquid_trash_rack=json.loads(lw.amsliquidtrash)
         saliva_rack = json.loads(lw.ams2401)
 
-        p200_tips_2 = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+        p200_tips_2 = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots_2]
         src_racks_2 = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
-        src_tubes_2 = src_racks[0].rows()[0]+src_racks[1].rows()[0]
-        trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+        src_tubes_2 = src_racks_2[0].rows()[0]+src_racks_2[1].rows()[0]
+        trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
         dest_plate_2 = protocol.load_labware(plate_name, plate_slot)
         multi_pipette_2 = multi_pipette
-        multi_pipette_2.tip_racks = p200_tips_2
-        multi_pipette_2.trash_container = trash_2
+#         multi_pipette_2.tip_racks = p200_tips_2
+#         multi_pipette_2.trash_container = trash_2
         # multi_pipette_2.drop_tips() if multi_pipette_2.has_tip else 1
 
+    elif deck_plan == 'saliva_to_dtt_GEBplate':
+        # for 1st shift
+        protocol = initialize(simulate =simulate,**kwarg)
+        p200_tip_name = "opentrons_96_filtertiprack_200ul"
+        p200_tip_slots = ["2","1"]
+        left_pip_name = "p300_multi"
+        plate_name = json.loads(lw.geb_96_wellplate)
+        plate_slot ="6"
+        rack_slots = ["3","9"]
+        trash_slot="5"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+        saliva_rack = json.loads(lw.ams2402)
+
+        p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+        src_racks = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
+        src_tubes = src_racks[0].rows()[0]+src_racks[1].rows()[0]
+        trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+        dest_plate = protocol.load_labware_from_definition(plate_name, plate_slot)
+        multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
+        multi_pipette.trash_container = trash
+        # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
+
+        #for 2nd shift
+        p200_tip_name = "opentrons_96_filtertiprack_200ul"
+        p200_tip_slots_2 = ["11"]
+        left_pip_name = "p300_multi"
+        plate_name = json.loads(lw.geb_96_wellplate)
+        plate_slot ="7"
+        rack_slots = ["4","10"]
+        trash_slot_2="8"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+        saliva_rack = json.loads(lw.ams2402)
+
+        p200_tips_2 = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots_2]
+        src_racks_2 = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
+        src_tubes_2 = src_racks_2[0].rows()[0]+src_racks_2[1].rows()[0]
+        trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
+        dest_plate_2 = protocol.load_labware_from_definition(plate_name, plate_slot)
+        multi_pipette_2 = multi_pipette
+#         multi_pipette_2.tip_racks = p200_tips_2
+#         multi_pipette_2.trash_container = trash_2
 
 
 def p_dispense(pipette,well,volume,disp=1):
@@ -114,7 +156,7 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
     multi_pipette = pipette
     multi_pipette.flow_rate.aspirate = 120
     multi_pipette.flow_rate.dispense = 120
-    tip_press_increment=0.4
+    tip_press_increment=0.3
     tip_presses = 1
 
     #pipette parameters
@@ -135,7 +177,7 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
         _log_time(st,event = 'Aspirate DTT buffer') if get_time else 1
         st = timeit.default_timer() if get_time else 1
 
-    multi_pipette.aspirate(asp_vol, s.bottom(10))
+    multi_pipette.aspirate(asp_vol, s.bottom(2))
     multi_pipette.air_gap(air_vol)
     _log_time(st,event = 'Aspirate saliva') if get_time else 1
     st = timeit.default_timer() if get_time else 1
