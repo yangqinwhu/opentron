@@ -7,7 +7,7 @@ sys.path.append("/var/lib/jupyter/notebooks")
 ams2401 = """{"ordering":[["A1","B1","C1","D1"],["A2","B2","C2","D2"],["A3","B3","C3","D3"],["A4","B4","C4","D4"],["A5","B5","C5","D5"],["A6","B6","C6","D6"]],"brand":{"brand":"ams2401","brandId":[]},"metadata":{"displayName":"ams2401 5ml rack","displayCategory":"wellPlate","displayVolumeUnits":"µL","tags":[]},"dimensions":{"xDimension":127.76,"yDimension":85.47,"zDimension":72},"wells":{"A1":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":18.38,"y":69.73,"z":22},"B1":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":18.38,"y":51.83,"z":22},"C1":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":18.38,"y":33.93,"z":22},"D1":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":18.38,"y":16.03,"z":22},"A2":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":36.28,"y":69.73,"z":22},"B2":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":36.28,"y":51.83,"z":22},"C2":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":36.28,"y":33.93,"z":22},"D2":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":36.28,"y":16.03,"z":22},"A3":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":54.18,"y":69.73,"z":22},"B3":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":54.18,"y":51.83,"z":22},"C3":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":54.18,"y":33.93,"z":22},"D3":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":54.18,"y":16.03,"z":22},"A4":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":72.08,"y":69.73,"z":22},"B4":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":72.08,"y":51.83,"z":22},"C4":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":72.08,"y":33.93,"z":22},"D4":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":72.08,"y":16.03,"z":22},"A5":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":89.98,"y":69.73,"z":22},"B5":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":89.98,"y":51.83,"z":22},"C5":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":89.98,"y":33.93,"z":22},"D5":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":89.98,"y":16.03,"z":22},"A6":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":107.88,"y":69.73,"z":22},"B6":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":107.88,"y":51.83,"z":22},"C6":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":107.88,"y":33.93,"z":22},"D6":{"depth":50,"totalLiquidVolume":5000,"shape":"circular","diameter":14.2,"x":107.88,"y":16.03,"z":22}},"groups":[{"metadata":{"wellBottomShape":"v"},"wells":["A1","B1","C1","D1","A2","B2","C2","D2","A3","B3","C3","D3","A4","B4","C4","D4","A5","B5","C5","D5","A6","B6","C6","D6"]}],"parameters":{"format":"irregular","quirks":[],"isTiprack":false,"isMagneticModuleCompatible":false,"loadName":"ams2401_24_wellplate_5000ul"},"namespace":"custom_beta","version":1,"schemaVersion":2,"cornerOffsetFromSlot":{"x":0,"y":0,"z":0}}"""
 
 ams2402 = """{"ordering":[["A1","B1","C1","D1"],["A2","B2","C2","D2"],["A3","B3","C3","D3"],["A4","B4","C4","D4"],["A5","B5","C5","D5"],["A6","B6","C6","D6"]],"brand":{"brand":"ams2402","brandId":[]},"metadata":{"displayName":"Ams2402 24 Well Plate 10000 µL","displayCategory":"wellPlate","displayVolumeUnits":"µL","tags":[]},"dimensions":{"xDimension":127.76,"yDimension":85.47,"zDimension":100.2},"wells":{"A1":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":18.38,"y":69.73,"z":5.2},"B1":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":18.38,"y":51.83,"z":5.2},"C1":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":18.38,"y":33.93,"z":5.2},"D1":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":18.38,"y":16.03,"z":5.2},"A2":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":36.28,"y":69.73,"z":5.2},"B2":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":36.28,"y":51.83,"z":5.2},"C2":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":36.28,"y":33.93,"z":5.2},"D2":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":36.28,"y":16.03,"z":5.2},"A3":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":54.18,"y":69.73,"z":5.2},"B3":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":54.18,"y":51.83,"z":5.2},"C3":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":54.18,"y":33.93,"z":5.2},"D3":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":54.18,"y":16.03,"z":5.2},"A4":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":72.08,"y":69.73,"z":5.2},"B4":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":72.08,"y":51.83,"z":5.2},"C4":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":72.08,"y":33.93,"z":5.2},"D4":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":72.08,"y":16.03,"z":5.2},"A5":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":89.98,"y":69.73,"z":5.2},"B5":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":89.98,"y":51.83,"z":5.2},"C5":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":89.98,"y":33.93,"z":5.2},"D5":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":89.98,"y":16.03,"z":5.2},"A6":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":107.88,"y":69.73,"z":5.2},"B6":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":107.88,"y":51.83,"z":5.2},"C6":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":107.88,"y":33.93,"z":5.2},"D6":{"depth":95,"totalLiquidVolume":10000,"shape":"circular","diameter":14.2,"x":107.88,"y":16.03,"z":5.2}},"groups":[{"metadata":{"wellBottomShape":"flat"},"wells":["A1","B1","C1","D1","A2","B2","C2","D2","A3","B3","C3","D3","A4","B4","C4","D4","A5","B5","C5","D5","A6","B6","C6","D6"]}],"parameters":{"format":"irregular","quirks":[],"isTiprack":false,"isMagneticModuleCompatible":false,"loadName":"ams2402_24_wellplate_10000ul"},"namespace":"custom_beta","version":1,"schemaVersion":2,"cornerOffsetFromSlot":{"x":0,"y":0,"z":0}}"""
-
+ams2402 = ams2401
 
 amsliquidtrash="""{"ordering":[["A1"]],"brand":{"brand":"ams_liquid_trash","brandId":[]},"metadata":{"displayName":"ams_liquid_trash_tipbox","displayCategory":"reservoir","displayVolumeUnits":"µL","tags":[]},"dimensions":{"xDimension":127.76,"yDimension":85.47,"zDimension":80},"wells":{"A1":{"depth":70,"totalLiquidVolume":10000,"shape":"rectangular","xDimension":100,"yDimension":70,"x":64,"y":43.47,"z":10}},"groups":[{"metadata":{"wellBottomShape":"flat"},"wells":["A1"]}],"parameters":{"format":"irregular","quirks":["centerMultichannelOnWells","touchTipDisabled"],"isTiprack":false,"isMagneticModuleCompatible":false,"loadName":"ams_liquid_trash_tipbox"},"namespace":"custom_beta","version":1,"schemaVersion":2,"cornerOffsetFromSlot":{"x":0,"y":0,"z":0}}"""
 
@@ -19,10 +19,22 @@ geb_96_wellplate="""{"ordering":[["A1","B1","C1","D1","E1","F1","G1","H1"],["A2"
 metadata = {'apiLevel': '2.7'}
 
 def run(protocol):
-    p200_tip_name = "opentrons_96_filtertiprack_200ul"
-    p200_tip_slots = ["2","1"]
-    left_pip_name = "p300_multi"
+    cali_p20=True
+    cali_p200=False
+    if cali_p200:
+        p200_tip_name = "opentrons_96_filtertiprack_200ul"
+        p200_tip_slots = ["2"]
+        left_pip_name = "p300_multi"
+        p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+        multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
+    elif cali_p20:
+        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_slots = ["1"]
+        p20_tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
+        right_pip_name = "p20_multi_gen2"
+        multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=p20_tips)
       #'nest_96_wellplate_100ul_pcr_full_skirt'
+
     plate_slot ="6"
     rack_slots = ["3"]
     trash_slot="5"
@@ -33,16 +45,17 @@ def run(protocol):
     plate_name = json.loads(geb_96_wellplate)
 
 
-    p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
+
     src_racks = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
     src_tubes = src_racks[0].rows()[0]
     src_racks_10ml = [protocol.load_labware_from_definition(saliva_rack_10ml,slot) for slot in saliva_rack_10ml_slots]
     src_tubes_10ml = src_racks_10ml[0].rows()[0]
 
-    trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+
     dest_plate = protocol.load_labware_from_definition(plate_name, plate_slot)
-    multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
+    trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
     multi_pipette.trash_container = trash
+
 
 
     s = src_tubes[0]
@@ -50,6 +63,6 @@ def run(protocol):
     d = dest_plate.rows()[0][0]
     # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
     # multi_pipette.pick_up_tip()
-    multi_pipette.transfer(100,s,d)
-    multi_pipette.transfer(100,s1,d)
+    multi_pipette.transfer(20,s,d)
+    multi_pipette.transfer(20,s1,d)
     # multi_pipette.drop_tips()

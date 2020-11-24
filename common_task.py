@@ -38,7 +38,7 @@ def initialize(simulate =False,**kwarg):
 
 def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
     global p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2
-    global p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
+    global p20_tips,p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
 
     if deck_plan == 'saliva_to_dtt':
         # for 1st shift
@@ -125,6 +125,28 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
 #         multi_pipette_2.tip_racks = p200_tips_2
 #         multi_pipette_2.trash_container = trash_2
 
+    if deck_plan == 'sample_to_lamp':
+        # for 1st shift
+        protocol = initialize(simulate =simulate,**kwarg)
+        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_slots = ["5","4"]
+        right_pip_name = "p20_multi_gen2"
+        plate_name = json.loads(lw.geb_96_wellplate)
+        sample_plate_slot ="6"
+        lamp_plate_slot="3"
+        trash_slot="2"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+
+        p20_tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
+        src_plate = protocol.load_labware_from_definition(plate_name, sample_plate_slot)
+        src_tubes = src_plate.rows()[0]
+        dest_plate = protocol.load_labware_from_definition(plate_name, lamp_plate_slot)
+        multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=p20_tips)
+        trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+        multi_pipette.trash_container = trash
+        # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
+
+
 
 def p_dispense(pipette,well,volume,disp=1):
     """ Use pipette to perform multiple dispense
@@ -147,21 +169,21 @@ def p_dispense(pipette,well,volume,disp=1):
         pipette.dispense(volume, well.bottom(3))
         well = _next_row_well(well)
 
-def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,simulate = False,get_time = 0,disp=2):
+def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
         #print ("Transfering saliva samples in rack {} column {}:".format(1,2))
     #set up pipette parameter
     multi_pipette = pipette
-    multi_pipette.flow_rate.aspirate = 120
-    multi_pipette.flow_rate.dispense = 120
+    if multi_pipette.max_volume>100:
+        multi_pipette.flow_rate.aspirate = 120
+        multi_pipette.flow_rate.dispense = 120
     tip_press_increment=0.3
     tip_presses = 1
 
     #pipette parameters
     asp_vol = (samp_vol*disp)*1.1
-    print ("Aspirate {:.1f} uL from {}".format(asp_vol,s))
     total_vol = asp_vol+air_vol+buffer_vol
 
     start = timeit.default_timer()
@@ -177,7 +199,8 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
         _log_time(st,event = 'Aspirate DTT buffer') if get_time else 1
         st = timeit.default_timer() if get_time else 1
 
-    multi_pipette.aspirate(asp_vol, s.bottom(2))
+    multi_pipette.aspirate(asp_vol, s.bottom(asp_bottom))
+    print ("Aspirate {:.1f} uL from {}".format(asp_vol,s))
     multi_pipette.air_gap(air_vol)
     _log_time(st,event = 'Aspirate saliva') if get_time else 1
     st = timeit.default_timer() if get_time else 1
@@ -188,14 +211,15 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
     st = timeit.default_timer() if get_time else 1
 
     if mix >0:
-        multi_pipette.flow_rate.dispense = 40
+        if multi_pipette.max_volume>100:
+            multi_pipette.flow_rate.dispense = 40
         multi_pipette.mix(mix,int(total_vol/2))
         multi_pipette.air_gap(air_vol)
         _log_time(st,event = 'Mix saliva dtt') if get_time else 1
         st = timeit.default_timer() if get_time else 1
 
     stop = timeit.default_timer()
-    if simulate:
+    if dry_run:
         multi_pipette.return_tip()
         st = timeit.default_timer() if get_time else 1
     else:
