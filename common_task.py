@@ -23,7 +23,7 @@ def initialize(simulate =False,**kwarg):
     from opentrons import protocol_api
     import ams_labware as lw
     import sys
-    # sys.path.append("/data/user_storage/opentrons_data/jupyter/modules_storage")
+    # sys.path.append("/var/lib/jupyter/notebooks")
     # import labware_volume as lv
     global protocol,lw
     if simulate:
@@ -37,7 +37,7 @@ def initialize(simulate =False,**kwarg):
     return protocol
 
 def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
-    global p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2
+    global p20_tips_2,p200_tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2
     global p20_tips,p200_tips,src_racks,src_tubes,trash,dest_plate,multi_pipette
 
     if deck_plan == 'saliva_to_dtt':
@@ -146,9 +146,23 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
+        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_slots_2 = ["10","1"]
+        right_pip_name = "p20_multi_gen2"
+        plate_name = json.loads(lw.geb_96_wellplate)
+        sample_plate_slot_2 ="11"
+        lamp_plate_slot_2="8"
+        trash_slot_2="7"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+
+        p20_tips_2 = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots_2]
+        src_plate_2 = protocol.load_labware_from_definition(plate_name, sample_plate_slot_2)
+        src_tubes_2 = src_plate_2.rows()[0]
+        dest_plate_2 = protocol.load_labware_from_definition(plate_name, lamp_plate_slot_2)
+        trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
 
 
-def p_dispense(pipette,well,volume,disp=1):
+def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
     """ Use pipette to perform multiple dispense
     volume: sample volume for each dispense
     disp: dispense times
@@ -166,10 +180,10 @@ def p_dispense(pipette,well,volume,disp=1):
 
     for i in range(0,disp):
         print ("current dispensing well is {}".format(well))
-        pipette.dispense(volume, well.bottom(3))
+        pipette.dispense(volume, well.bottom(disp_bottom))
         well = _next_row_well(well)
 
-def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2):
+def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2,disp_bottom=3):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
@@ -183,7 +197,7 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
     tip_presses = 1
 
     #pipette parameters
-    asp_vol = (samp_vol*disp)*1.1
+    asp_vol = (samp_vol*disp)*1.0
     total_vol = asp_vol+air_vol+buffer_vol
 
     start = timeit.default_timer()
@@ -206,7 +220,7 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
     st = timeit.default_timer() if get_time else 1
 
     p_dispense(multi_pipette,d,air_vol) if air_vol >0 else 1
-    p_dispense(multi_pipette,d,samp_vol,disp=disp)
+    p_dispense(multi_pipette,d,samp_vol,disp=disp,disp_bottom=disp_bottom)
     _log_time(st,event = 'Dispense saliva') if get_time else 1
     st = timeit.default_timer() if get_time else 1
 

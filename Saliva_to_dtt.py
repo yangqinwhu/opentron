@@ -9,7 +9,7 @@ import common_task as ct
 import importlib
 importlib.reload(ct)
 
-ct.load_deck("saliva_to_dtt_GEBplate",simulate = False)
+ct.load_deck("saliva_to_dtt",simulate = True)
 deck_plan = ct.protocol.deck
 pipette = ct.multi_pipette
 # sample info
@@ -17,10 +17,9 @@ pipette = ct.multi_pipette
 samp_vol = 50
 disp = 2
 air_vol = 25
-samples = 4
-sample_c = int((samples-1)/4)+1
+samples = 48
 
-def run():
+def run(asp_bottom=5,disp_bottom=2):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -29,7 +28,7 @@ def run():
     To do
     1. Insert manual pause """
     batch = 1
-    while batch <=2:
+    while batch <=4:
         print ("###################### BEGIN ########################")
         print ("Batch # {} running".format(batch))
         if batch%2:
@@ -50,9 +49,10 @@ def run():
             p300m.trash_container = ct.trash_2
 
         start = timeit.default_timer()
+        sample_c = int((samples-1)/4)+1
         for s, d in zip(src_tubes[:sample_c],dest_plate.rows()[0][:sample_c]):
             print ("Start transfering Saliva to 96 well plate")
-            run_time,well,incubation_start_time = ct.p_transfer(p300m,s,d,samp_vol = samp_vol,air_vol=air_vol,get_time=1,disp=disp,mix=0)
+            run_time,well,incubation_start_time = ct.p_transfer(p,s,d,samp_vol = samp_vol,asp_bottom =asp_bottom, disp_bottom =disp_bottom, air_vol=air_vol,get_time=1,disp=disp,mix=0,dry_run=False)
             print ("Total transfer time for 4 samples is {:.2f} second".format(run_time))
 
         batch +=1
