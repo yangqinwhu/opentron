@@ -12,8 +12,8 @@ importlib.reload(ct)
 ct.load_deck("sample_to_lamp_96well",simulate = True)
 deck_plan = ct.protocol.deck
 pipette = ct.multi_pipette
+
 # sample info
-deck_plan
 samp_vol = 5
 disp = 1
 air_vol = 0
