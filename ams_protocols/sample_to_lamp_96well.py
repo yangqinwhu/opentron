@@ -13,20 +13,44 @@ import sys,json
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
-ct.load_deck("sample_to_lamp_96well",simulate = True)
-deck_plan = ct.protocol.deck
-pipette = ct.multi_pipette
+# # sample info
+# samp_vol = 5
+# disp = 1
+# air_vol = 0
+# samples = 8
+# sample_per_column = 8
+# total_batch = 1
+# replicates = 4 # i.e. one saliva sample into multiple MM. Default is 2, one for N7 and one for RP4
 
-# sample info
-samp_vol = 5
-disp = 1
-air_vol = 0
-samples = 8
-sample_per_column = 8
-total_batch = 1
-replicates = 4 # i.e. one saliva sample into multiple MM. Default is 2, one for N7 and one for RP4
+sample_info={
+    "samples":48,
+    "sample_per_column":8,
+    "replicates":2,
+    "total_batch":1,
+    "start_batch":1,
+}
+transfer_param={
+    "samp_vol":5,
+    "air_vol": 0,
+    "disp":1,
+    "asp_bottom":0,
+    "disp_bottom":0,
+    'mix':0,
+    "get_time":1,
+    'dry_run':False,
+    "aspirate_rate": 7.6,
+    "dispense_rate": 7.6,
+    "tip_press_increment":0.3,
+    "tip_presses" : 1,
+}
 
-def run(asp_bottom=0,disp_bottom=0):
+def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
+    ct.load_deck(deck,simulate = simulate)
+    deck_plan = ct.protocol.deck
+    pipette = ct.multi_pipette
+    return deck_plan
+
+def run_batch(batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
     """
     Pipette: P20 mounted on the right
     1st set of labwares:
@@ -34,38 +58,46 @@ def run(asp_bottom=0,disp_bottom=0):
     Current run uses the multi pipette P300 mounted on the left
     To do
     1. Insert manual pause """
-    batch = 1
-    while batch <=total_batch:
-        print ("###################### BEGIN ########################")
-        print ("Batch # {} running".format(batch))
-        src_tubes = ct.src_tubes
-        dest_tubes = ct.dest_plate.rows()[0]+ct.dest_plate_2.rows()[0]
-        p = ct.multi_pipette
-        p.tip_racks = ct.p20_tips+ct.p20_tips_2
-        tip_start = ct.p20_tips[0]['A1']
-        p.reset_tipracks()
-        p.trash_container = ct.trash
+    print ("###################### BATCH BEGIN ########################")
+    print ("Batch # {} running".format(batch))
+    src_tubes = ct.src_tubes
+    dest_tubes = ct.dest_plate.rows()[0]+ct.dest_plate_2.rows()[0]
+    p = ct.multi_pipette
+    p.tip_racks = ct.p20_tips+ct.p20_tips_2
+    tip_start = ct.p20_tips[0]['A1']
+    p.reset_tipracks()
+    p.trash_container = ct.trash
 
 
-        start = timeit.default_timer()
-        sample_c = int((samples-1)/sample_per_column)+1
-        sts=[]
-        for i in src_tubes[:sample_c]:
-            for j in range(0,replicates):
-                sts.append(i)
-        dts = dest_tubes[:sample_c*replicates]
-        print (len(sts))
-        print (len(dts))
-        if len(sts)>len(dts):
-            raise Exception("Destination plate well is less than sample well. Please double check sample and replicate number.")
-        for i, (s, d) in enumerate(zip(sts,dts)):
-            p.trash_container = ct.trash_2 if i > 11 else ct.trash
-            print ("Start transfering Saliva to 96 well plate")
-            run_time,well,incubation_start_time = ct.p_transfer(p,s,d,samp_vol = samp_vol,asp_bottom =asp_bottom, disp_bottom =disp_bottom, air_vol=air_vol,get_time=1,disp=disp,mix=0,dry_run=False,blowout=True)
-            print ("Total transfer time for 8 samples is {:.2f} second".format(run_time))
+    # p.flow_rate.aspirate = aspirate_rate
+    # p.flow_rate.dispense = dispense_rate
 
-        batch +=1
-        ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
-        print ("####################### END ######################")
+    start = timeit.default_timer()
+    sample_c = int((samples-1)/sample_per_column)+1
+    sts=[]
+    for i in src_tubes[:sample_c]:
+        for j in range(0,replicates):
+            sts.append(i)
+    dts = dest_tubes[:sample_c*replicates]
+    print (len(sts))
+    print (len(dts))
+    if len(sts)>len(dts):
+        raise Exception("Destination plate well is less than sample well. Please double check sample and replicate number.")
+    for i, (s, d) in enumerate(zip(sts,dts)):
+        p.trash_container = ct.trash_2 if i > 11 else ct.trash
+        print ("Start transfering Saliva to 96 well plate")
+        run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
+        print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
 
-run()
+    batch +=1
+    ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
+    print ("####################### BATCH END ######################")
+
+def run(total_batch=2,start_batch=1,**kwarg):
+    batch = start_batch%2
+    while batch <= total_batch:
+        run_batch(batch=batch,**kwarg)
+        batch+=1
+
+# initialize_robot()
+# run(**sample_info,**transfer_param)

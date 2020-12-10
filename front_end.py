@@ -39,19 +39,33 @@
 
 import requests,json
 
-res = requests.get("http://127.0.0.1:8000",json={'hello':3})
+server_ip = "192.168.1.46"
+server_ip = "127.0.0.1"
+PORT = 8000
+
+sample_info={
+    "samples":48,
+    "sample_per_column":8,
+    "total_batch":2,
+    "start_batch":2,
+}
+transfer_param={
+    "samp_vol":50,
+    "air_vol": 25,
+    "disp":1,
+    "asp_bottom":10,
+    "disp_bottom":2,
+    'mix':0,
+    "get_time":1,
+    'dry_run':True,
+    "aspirate_rate": 120,
+    "dispense_rate": 120,
+    "tip_press_increment":0.3,
+    "tip_presses" : 1,
+}
+
+input = {**sample_info,**transfer_param}
+
+
+res = requests.get("http://127.0.0.1:8000",json=input)
 res.text
-
-import sys,json
-# sys.path.append("/var/lib/jupyter/notebooks")
-sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
-from ams_protocols import saliva_to_dtt
-
-
-def addtest(a=3,b=4):
-    print (a+b)
-
-d={'a':3}
-e={"b":8}
-addtest()
-addtest(**d)

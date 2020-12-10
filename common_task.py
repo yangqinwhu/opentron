@@ -8,7 +8,7 @@ def _log_time(start_time,event = 'This step',print_log=1):
     run_time = run_time/60 if unit == "min" else run_time
     log ='{} takes {:.2} {}'.format(event,run_time,unit)
     print (log) if print_log else 1
-    return run_time,log
+    return log+'\n'
 
 def initialize(simulate =False,**kwarg):
     """
@@ -19,7 +19,6 @@ def initialize(simulate =False,**kwarg):
     metadata = {
         'protocolName': 'Saliva to DTT',
     }
-
     from opentrons import protocol_api
     import labwares.ams_labware as lw
     import sys
@@ -269,18 +268,16 @@ def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
         pipette.dispense(volume, well.bottom(disp_bottom))
         well = _next_row_well(well)
 
-def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2,disp_bottom=3,blowout = True):
+def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2,disp_bottom=3,blowout = True,tip_presses = 1,tip_press_increment=0.3):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
         #print ("Transfering saliva samples in rack {} column {}:".format(1,2))
     #set up pipette parameter
     multi_pipette = pipette
-    if multi_pipette.max_volume>100:
-        multi_pipette.flow_rate.aspirate = 120
-        multi_pipette.flow_rate.dispense = 120
-    tip_press_increment=0.3
-    tip_presses = 1
+    # if multi_pipette.max_volume>100:
+    #     multi_pipette.flow_rate.aspirate = 120
+    #     multi_pipette.flow_rate.dispense = 120
 
     #pipette parameters
     asp_vol = (samp_vol*disp)*1.0

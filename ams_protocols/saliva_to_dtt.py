@@ -10,41 +10,40 @@ import json,timeit,time
 import common_task as ct
 import importlib
 import sys,json
-# sys.path.append("/var/lib/jupyter/notebooks")
+sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 importlib.reload(ct)
 
 
-ct.load_deck("saliva_to_dtt_biobank_96well_1000ul",simulate = True)
-deck_plan = ct.protocol.deck
-pipette = ct.multi_pipette
-# sample info
+# sample_info={
+#     "samples":48,
+#     "sample_per_column":8,
+#     "total_batch":2,
+#     "start_batch":2,
+# }
+# transfer_param={
+#     "samp_vol":50,
+#     "air_vol": 25,
+#     "disp":1,
+#     "asp_bottom":10,
+#     "disp_bottom":2,
+#     'mix':0,
+#     "get_time":1,
+#     'dry_run':True,
+#     "aspirate_rate": 120,
+#     "dispense_rate": 120,
+#     "tip_press_increment":0.3,
+#     "tip_presses" : 1,
+# }
 
-# samp_vol = 50
-# disp = 1
-# air_vol = 25
-# samples = 96
-# sample_per_column = 8
-# total_batch = 1
+def initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = True,**kwarg):
+    ct.load_deck(deck,simulate = simulate)
+    deck_plan = ct.protocol.deck
+    pipette = ct.multi_pipette
+    return deck_plan
 
-sample_info={
-    "samples":48,
-    "sample_per_column":8,
-    "total_batch":2,
-    "start_batch":1,
-}
-transfer_param={
-    "samp_vol":50,
-    "air_vol": 25,
-    "disp":1,
-    "asp_bottom":10,
-    "disp_bottom":2,
-    'mix':0,
-    "get_time":1,
-    'dry_run':True
-}
 
-def run_batch(batch=1,samples=8,sample_per_column=8,**kwarg):
+def run_batch(batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -52,11 +51,11 @@ def run_batch(batch=1,samples=8,sample_per_column=8,**kwarg):
     Current run uses the multi pipette P300 mounted on the left
     To do
     1. Insert manual pause """
-    print ("###################### BEGIN ########################")
+    print ("###################### BATCH BEGIN ########################")
     print ("Batch # {} running".format(batch))
     if batch%2:
         src_tubes = ct.src_tubes
-        dest_plate = ct.dest_plate
+        dest_tubes = ct.dest_plate.rows()[0]
         p300m = ct.multi_pipette
         p300m.tip_racks = ct.p200_tips
         tip_start = ct.p200_tips[0]['A1']
@@ -64,7 +63,7 @@ def run_batch(batch=1,samples=8,sample_per_column=8,**kwarg):
         p300m.trash_container = ct.trash
     else:
         src_tubes = ct.src_tubes_2
-        dest_plate = ct.dest_plate_2
+        dest_tubes = ct.dest_plate_2.rows()[0]
         p300m = ct.multi_pipette
         p300m.tip_racks = ct.p200_tips_2
         tip_start = ct.p200_tips_2[0]['A1']
@@ -72,22 +71,23 @@ def run_batch(batch=1,samples=8,sample_per_column=8,**kwarg):
         p300m.trash_container = ct.trash_2
 
     p=p300m
+    p.flow_rate.aspirate = aspirate_rate
+    p.flow_rate.dispense = dispense_rate
     start = timeit.default_timer()
     sample_c = int((samples-1)/sample_per_column)+1
-    for s, d in zip(src_tubes[:sample_c],dest_plate.rows()[0][:sample_c]):
+    for s, d in zip(src_tubes[:sample_c],dest_tubes[:sample_c]):
         print ("Start transfering Saliva to 96 well plate")
         run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
         print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
 
-    batch +=1
     ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
-    print ("####################### END ######################")
+    print ("####################### BATCH END ######################")
 
 def run(total_batch=2,start_batch=1,**kwarg):
-    batch = start_batch%2
+    batch = start_batch
     while batch <= total_batch:
         run_batch(batch=batch,**kwarg)
         batch+=1
 
-
-run(**sample_info,**transfer_param)
+# initialize_robot()
+# run(**sample_info,**transfer_param)

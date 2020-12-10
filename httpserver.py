@@ -3,6 +3,7 @@ import socketserver
 from http.server import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
 import sys,json
+import ams_protocols.saliva_to_dtt as prot
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 server_ip = "192.168.1.46"
@@ -38,17 +39,6 @@ def dispatch(instance,path,):
         raise KeyError(f'Method <{methodName}> was not found on <{instance.__class__.__name__}>.')
     return method()
 
-
-
-class MyHandler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:
-        print('got request')
-        # do something here with another thread
-
-        self.send_response(200)
-        self.send_header('Content-type','text/html')
-        self.end_headers()
-        self.wfile.write('hello world'.encode())
 
 class SimpleHandler(BaseHTTPRequestHandler,):
 
@@ -88,6 +78,11 @@ class SimpleHandler(BaseHTTPRequestHandler,):
             print(path)
             jsondata = self.json()
             print(jsondata)
+            prot.initialize_robot()
+            print ("ok")
+            prot.run(**jsondata)
+            print ("ok2")
+
             # self.sendHTML('<h1>hello world</h1>')
             self.sendMAP(json.dumps(jsondata))
         except:
@@ -108,8 +103,6 @@ class SimpleHandler(BaseHTTPRequestHandler,):
 
     def sendFileOr404(self,filePath,mode='html'):
        return self.abort404()
-
-
 
 
 with HTTPServer((server_ip, PORT), SimpleHandler) as httpd:
