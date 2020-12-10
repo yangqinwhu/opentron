@@ -1,4 +1,5 @@
-"""Use lamp_setup_app.py to calibrate all labware first
+"""Saliva to LAMP reaction
+Use lamp_setup_app.py to calibrate all labware first
 If you need to control gpios, first stop the robot server with systemctl stop opentrons-robot-server. Until you restart the server with systemctl start opentrons-robot-server, you will be unable to control the robot using the Opentrons app.
 """
 
@@ -8,6 +9,9 @@ import json,timeit,time
 import common_task as ct
 import importlib
 importlib.reload(ct)
+import sys,json
+# sys.path.append("/var/lib/jupyter/notebooks")
+sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
 ct.load_deck("sample_to_lamp_96well",simulate = True)
 deck_plan = ct.protocol.deck
@@ -57,9 +61,11 @@ def run(asp_bottom=0,disp_bottom=0):
         for i, (s, d) in enumerate(zip(sts,dts)):
             p.trash_container = ct.trash_2 if i > 11 else ct.trash
             print ("Start transfering Saliva to 96 well plate")
-            run_time,well,incubation_start_time = ct.p_transfer(p,s,d,samp_vol = samp_vol,asp_bottom =asp_bottom, disp_bottom =disp_bottom, air_vol=air_vol,get_time=1,disp=disp,mix=0,dry_run=False)
+            run_time,well,incubation_start_time = ct.p_transfer(p,s,d,samp_vol = samp_vol,asp_bottom =asp_bottom, disp_bottom =disp_bottom, air_vol=air_vol,get_time=1,disp=disp,mix=0,dry_run=False,blowout=True)
             print ("Total transfer time for 8 samples is {:.2f} second".format(run_time))
 
         batch +=1
         ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
         print ("####################### END ######################")
+
+run()

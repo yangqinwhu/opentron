@@ -8,9 +8,11 @@ import json,timeit,time
 import common_task as ct
 import importlib
 importlib.reload(ct)
+import sys,json
+# sys.path.append("/var/lib/jupyter/notebooks")
+sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
-
-ct.load_deck("sample_to_lamp",simulate = False)
+ct.load_deck("sample_to_lamp",simulate = True)
 deck_plan = ct.protocol.deck
 pipette = ct.multi_pipette
 # sample info

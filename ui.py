@@ -15,7 +15,7 @@ def choose_protocol(protocols_dic):
     to_do = int(input(s))
 
     if to_do == 1:
-        import Saliva_to_dtt as prot
+        import saliva_to_dtt as prot
         return prot
     elif to_do ==2:
         import sample_to_lamp_96well as prot
@@ -23,7 +23,7 @@ def choose_protocol(protocols_dic):
 
 def confirm_deckplan(prot):
     prot.deck_plan
-    s="Check following deck plan:\n"
+    s="Check the deck plan:\n"
     for k in prot.deck_plan.keys():
         v= prot.deck_plan[k]
         if v != None:
@@ -42,7 +42,7 @@ prot = choose_protocol(protocols_dic)
 to_run = ""
 while to_run !="y":
     to_run = confirm_deckplan(prot)
-    if to_run =='y' or 'Y':
+    if to_run in 'yY':
         prot.run()
         break
     elif to_run == 'e':

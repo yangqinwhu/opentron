@@ -21,7 +21,7 @@ def initialize(simulate =False,**kwarg):
     }
 
     from opentrons import protocol_api
-    import ams_labware as lw
+    import labwares.ams_labware as lw
     import sys
     # sys.path.append("/var/lib/jupyter/notebooks")
     # import labware_volume as lv
@@ -269,7 +269,7 @@ def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
         pipette.dispense(volume, well.bottom(disp_bottom))
         well = _next_row_well(well)
 
-def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2,disp_bottom=3):
+def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,dry_run = False,get_time = 0,disp=2,asp_bottom=2,disp_bottom=3,blowout = True):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
@@ -307,6 +307,8 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
 
     p_dispense(multi_pipette,d,air_vol) if air_vol >0 else 1
     p_dispense(multi_pipette,d,samp_vol,disp=disp,disp_bottom=disp_bottom)
+    if blowout:
+        multi_pipette.blow_out()
     _log_time(st,event = 'Dispense saliva') if get_time else 1
     st = timeit.default_timer() if get_time else 1
 

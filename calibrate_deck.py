@@ -22,8 +22,8 @@ biobank_96well_saliva_1000ul = """{"ordering":[["A1","B1","C1","D1","E1","F1","G
 metadata = {'apiLevel': '2.7'}
 
 def run(protocol):
-    cali_p20=False
-    cali_p200=True
+    cali_p20=True
+    cali_p200=False
     if cali_p200:
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
         p200_tip_slots = ["2"]
@@ -57,6 +57,7 @@ def run(protocol):
 
 
     dest_plate = protocol.load_labware_from_definition(plate_name, plate_slot)
+    dest_plate_2=protocol.load_labware('nest_96_wellplate_100ul_pcr_full_skirt',10)
     trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
     multi_pipette.trash_container = trash
 
@@ -65,8 +66,10 @@ def run(protocol):
     s = src_tubes[0]
     s1 = src_tubes_10ml[0]
     d = dest_plate.rows()[0][0]
+    d2 = dest_plate_2.rows()[0][0]
     # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
     # multi_pipette.pick_up_tip()
     multi_pipette.transfer(20,s,d)
     multi_pipette.transfer(20,s1,d)
+    multi_pipette.transfer(20,s1,d2)
     # multi_pipette.drop_tips()

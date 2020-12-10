@@ -19,50 +19,39 @@
 #         t.cancel()
 
 
-import time
-from threading import Thread
-
-answer = None
-
-def check():
-    time.sleep(2)
-    if answer == "n":
-        return
-    print("Too Slow")
-
-Thread(target = check).start()
-
-answer = input("Input something: ")
-
-
-a=[0,1,2]
+# import time
+# from threading import Thread
+#
+# answer = None
+#
+# def check():
+#     time.sleep(2)
+#     if answer == "n":
+#         return
+#     print("Too Slow")
+#
+# Thread(target = check).start()
+#
+# answer = input("Input something: ")
 
 
+##
 
-from opentrons import protocol_api
-# This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
-import json,timeit,time
-import common_task as ct
+import requests,json
+
+res = requests.get("http://127.0.0.1:8000",json={'hello':3})
+res.text
+
+import sys,json
+# sys.path.append("/var/lib/jupyter/notebooks")
+sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
+from ams_protocols import saliva_to_dtt
 
 
-protocol = ct.load_deck(simulate=True)
+def addtest(a=3,b=4):
+    print (a+b)
 
-
-protocol = ct.initialize(simulate=True)
-p200_tip_name = "opentrons_96_filtertiprack_200ul"
-p200_tip_slots = ["1","2"]
-p200_tips_2 = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
-left_pip_name = "p300_multi"
-multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
-multi_pipette.tip_racks
-multi_pipette_2 = multi_pipette
-multi_pipette_2.tip_racks = p200_tips_2
-multi_pipette_2.tip_racks
-protocol.cleanup()
-protocol.deck
-
-2%1
-2%2
-3%2
-4%2
-1%2
+d={'a':3}
+e={"b":8}
+addtest()
+addtest(**d)
