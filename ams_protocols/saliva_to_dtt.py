@@ -15,26 +15,7 @@ sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 importlib.reload(ct)
 
 
-# sample_info={
-#     "samples":48,
-#     "sample_per_column":8,
-#     "total_batch":2,
-#     "start_batch":2,
-# }
-# transfer_param={
-#     "samp_vol":50,
-#     "air_vol": 25,
-#     "disp":1,
-#     "asp_bottom":10,
-#     "disp_bottom":2,
-#     'mix':0,
-#     "get_time":1,
-#     'dry_run':True,
-#     "aspirate_rate": 120,
-#     "dispense_rate": 120,
-#     "tip_press_increment":0.3,
-#     "tip_presses" : 1,
-# }
+
 
 def initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = True,**kwarg):
     ct.load_deck(deck,simulate = simulate)
@@ -43,7 +24,7 @@ def initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = Tru
     return deck_plan
 
 
-def run_batch(batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
+def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -56,26 +37,25 @@ def run_batch(batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1
     if batch%2:
         src_tubes = ct.src_tubes
         dest_tubes = ct.dest_plate.rows()[0]
-        p300m = ct.multi_pipette
-        p300m.tip_racks = ct.p200_tips
-        tip_start = ct.p200_tips[0]['A1']
-        p300m.reset_tipracks()
-        p300m.trash_container = ct.trash
+        p = ct.multi_pipette
+        p.tip_racks = ct.tips
+        tip_start = ct.tips[0]['A1']
+        p.reset_tipracks()
+        p.trash_container = ct.trash
     else:
         src_tubes = ct.src_tubes_2
         dest_tubes = ct.dest_plate_2.rows()[0]
-        p300m = ct.multi_pipette
-        p300m.tip_racks = ct.p200_tips_2
-        tip_start = ct.p200_tips_2[0]['A1']
-        p300m.reset_tipracks()
-        p300m.trash_container = ct.trash_2
+        p = ct.multi_pipette
+        p.tip_racks = ct.tips_2
+        tip_start = ct.tips_2[0]['A1']
+        p.reset_tipracks()
+        p.trash_container = ct.trash_2
 
-    p=p300m
     p.flow_rate.aspirate = aspirate_rate
     p.flow_rate.dispense = dispense_rate
     start = timeit.default_timer()
     sample_c = int((samples-1)/sample_per_column)+1
-    for s, d in zip(src_tubes[:sample_c],dest_tubes[:sample_c]):
+    for s, d in zip(src_tubes[(start_tube-1):(sample_c+start_tube-1)],dest_tubes[(start_tube-1):(sample_c+start_tube-1)]):
         print ("Start transfering Saliva to 96 well plate")
         run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
         print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
@@ -89,5 +69,31 @@ def run(total_batch=2,start_batch=1,**kwarg):
         run_batch(batch=batch,**kwarg)
         batch+=1
 
-# initialize_robot()
-# run(**sample_info,**transfer_param)
+def test_run():
+    """This function is to run this file locally with all the parameters"""
+    sample_info={
+        "samples":48,
+        "sample_per_column":8,
+        "total_batch":2,
+        "start_batch":1,
+        "start_tube":1,
+        "replicates":2,
+    }
+    transfer_param={
+        "samp_vol":50,
+        "air_vol": 25,
+        "disp":1,
+        "asp_bottom":10,
+        "disp_bottom":2,
+        'mix':0,
+        "get_time":1,
+        'dry_run':True,
+        "aspirate_rate": 120,
+        "dispense_rate": 120,
+        "tip_press_increment":0.3,
+        "tip_presses" : 1,
+    }
+    initialize_robot(simulate = True)
+    run(**sample_info,**transfer_param)
+
+test_run()

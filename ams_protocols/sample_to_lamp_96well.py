@@ -22,27 +22,28 @@ sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 # total_batch = 1
 # replicates = 4 # i.e. one saliva sample into multiple MM. Default is 2, one for N7 and one for RP4
 
-sample_info={
-    "samples":48,
-    "sample_per_column":8,
-    "replicates":2,
-    "total_batch":1,
-    "start_batch":1,
-}
-transfer_param={
-    "samp_vol":5,
-    "air_vol": 0,
-    "disp":1,
-    "asp_bottom":0,
-    "disp_bottom":0,
-    'mix':0,
-    "get_time":1,
-    'dry_run':False,
-    "aspirate_rate": 7.6,
-    "dispense_rate": 7.6,
-    "tip_press_increment":0.3,
-    "tip_presses" : 1,
-}
+# sample_info={
+#     "samples":8,
+#     "sample_per_column":8,
+#     "replicates":2,
+#     "total_batch":1,
+#     "start_batch":1,
+#     "start_tube":2,
+# }
+# transfer_param={
+#     "samp_vol":5,
+#     "air_vol": 0,
+#     "disp":1,
+#     "asp_bottom":0,
+#     "disp_bottom":0,
+#     'mix':0,
+#     "get_time":1,
+#     'dry_run':False,
+#     "aspirate_rate": 7.6,
+#     "dispense_rate": 7.6,
+#     "tip_press_increment":0.3,
+#     "tip_presses" : 1,
+# }
 
 def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
     ct.load_deck(deck,simulate = simulate)
@@ -50,7 +51,7 @@ def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
     pipette = ct.multi_pipette
     return deck_plan
 
-def run_batch(batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
+def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
     """
     Pipette: P20 mounted on the right
     1st set of labwares:
@@ -71,14 +72,13 @@ def run_batch(batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0
 
     # p.flow_rate.aspirate = aspirate_rate
     # p.flow_rate.dispense = dispense_rate
-
     start = timeit.default_timer()
     sample_c = int((samples-1)/sample_per_column)+1
     sts=[]
-    for i in src_tubes[:sample_c]:
+    for i in src_tubes[(start_tube-1):(sample_c+start_tube-1)]:
         for j in range(0,replicates):
             sts.append(i)
-    dts = dest_tubes[:sample_c*replicates]
+    dts = dest_tubes[(start_tube-1):(sample_c*replicates+start_tube-1)]
     print (len(sts))
     print (len(dts))
     if len(sts)>len(dts):

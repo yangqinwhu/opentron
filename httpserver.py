@@ -3,7 +3,8 @@ import socketserver
 from http.server import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
 import sys,json
-import ams_protocols.saliva_to_dtt as prot
+import ams_protocols.saliva_to_dtt as saliva_to_dtt
+import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 server_ip = "192.168.1.46"
@@ -75,14 +76,17 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         try:
             # redirect / to /index
             path = self.path.strip('/') or 'index'
-            print(path)
+            # print(path)
             jsondata = self.json()
-            print(jsondata)
-            prot.initialize_robot()
+            # print(jsondata)
+            prot=saliva_to_dtt
+            prot.initialize_robot(**jsondata["robot_param"])
             print ("ok")
-            prot.run(**jsondata)
+            print( {**jsondata["sample_info"],**jsondata["transfer_param"]})
+            # t=Thread(target = prot.run,kwargs={**jsondata["sample_info"],**jsondata["transfer_param"]})
+            # t.start
+            prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
             print ("ok2")
-
             # self.sendHTML('<h1>hello world</h1>')
             self.sendMAP(json.dumps(jsondata))
         except:
