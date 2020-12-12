@@ -22,7 +22,8 @@
 
 ##
 
-import requests,json
+import requests,json,os
+import tkinter as tk
 
 server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
@@ -65,6 +66,8 @@ input={
 
 
 
+with open('front_end/defaults/default_robot_input','rt') as f:
+    input=json.load(f)
 
 res = requests.get("http://127.0.0.1:8000/run_robot",json=input)
 res.text

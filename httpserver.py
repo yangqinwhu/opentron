@@ -12,7 +12,6 @@ server_ip = "127.0.0.1"
 PORT = 8000
 
 
-
 class DispatchMeta(type):
     """
     NOT USED ANYMORE
