@@ -2,7 +2,7 @@
 import socketserver
 from http.server import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
-import sys,json
+import sys,json,time
 import ams_protocols.saliva_to_dtt as saliva_to_dtt
 import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
 # sys.path.append("/var/lib/jupyter/notebooks")
@@ -42,7 +42,6 @@ def dispatch(instance,path,):
 
 
 class SimpleHandler(BaseHTTPRequestHandler,):
-
     def json(self):
         "return json dict or empty dict"
         if self.headers['Content-Length']:
@@ -76,19 +75,12 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         try:
             # redirect / to /index
             path = self.path.strip('/') or 'index'
-            # print(path)
-            jsondata = self.json()
-            # print(jsondata)
-            prot=saliva_to_dtt
-            prot.initialize_robot(**jsondata["robot_param"])
-            print ("ok")
-            print( {**jsondata["sample_info"],**jsondata["transfer_param"]})
-            # t=Thread(target = prot.run,kwargs={**jsondata["sample_info"],**jsondata["transfer_param"]})
-            # t.start
-            prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
-            print ("ok2")
-            # self.sendHTML('<h1>hello world</h1>')
-            self.sendMAP(json.dumps(jsondata))
+            print(path)
+            if path =="run_robot":
+                self.run_robot()
+                self.sendData("Run started",'text/html')
+            elif path=="get_status":
+                self.get_status()
         except:
             # if not defined, try to look for raw html pate.
             self.sendFileOr404(path)
@@ -96,7 +88,6 @@ class SimpleHandler(BaseHTTPRequestHandler,):
     def do_POST(self):
         "respond to post request"
         self.logger.main.peripheral.led.show('wifi',[50,1],1,)
-
         try:
             # redirect / to /index
             path = self.path.strip('/') or 'index'
@@ -108,7 +99,62 @@ class SimpleHandler(BaseHTTPRequestHandler,):
     def sendFileOr404(self,filePath,mode='html'):
        return self.abort404()
 
+    def run_robot(self):
+        jsondata = self.json()
+        self.Q.put(jsondata)
+        # self.robot.initialize(jsondata)
+        # self.robot.run(jsondata)
 
-with HTTPServer((server_ip, PORT), SimpleHandler) as httpd:
-    print("serving at port", PORT)
-    httpd.serve_forever()
+    def get_status(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(self.robot.status.encode())
+
+class RunRobot:
+    def __init__(self):
+        self.prot=""
+        self.status="Not initialized"
+    def sele(self,name):
+        self.prot = name
+    def initialize(self,jsondata):
+        if jsondata["protocol"]=="saliva_to_dtt":
+            self.prot=saliva_to_dtt
+            # self.sele('saliva_to_dtt')
+        elif jsondata["protocol"]=="sample_to_lamp_96well":
+            # self.sele('sample_to_lamp_96well')
+            self.prot=sample_to_lamp_96well
+        if not jsondata["robot_status"]["initialized"]:
+            self.prot.initialize_robot(**jsondata["robot_param"])
+            print ("opentron initialized")
+            self.status = "Robot Initialized"
+    def run(self,jsondata):
+        if jsondata["robot_status"]["to_run"]:
+            self.prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
+            self.status = "Run finished"
+    def get_status(self):
+        self.status=self.prot.status
+
+
+def startserver():
+    with HTTPServer((server_ip, PORT), SimpleHandler) as httpd:
+        print("serving at port", PORT)
+        httpd.serve_forever()
+
+
+
+from queue import Queue
+msq = Queue()
+robot = RunRobot()
+SimpleHandler.robot=robot
+SimpleHandler.Q=msq
+
+Thread(target=startserver).start()
+
+while True:
+    if msq.empty():
+        time.sleep(0.1)
+        continue
+    jsondata = msq.get()
+    robot.initialize(jsondata)
+    robot.run(jsondata)

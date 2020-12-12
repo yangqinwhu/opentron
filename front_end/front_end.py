@@ -29,9 +29,14 @@ server_ip = "127.0.0.1"
 PORT = 8000
 
 input={
+    "protocol":"saliva_to_dtt",
+    "robot_status":{
+        "initialized":0,
+        "to_run":1,
+    },
     "robot_param":{
-    "simulate":True,
-    "deck":"saliva_to_dtt_biobank_96well_1000ul",
+        "simulate":True,
+        "deck":"saliva_to_dtt_biobank_96well_1000ul",
     },
     "sample_info":{
         "samples":8,
@@ -58,5 +63,10 @@ input={
 }
 
 
-res = requests.get("http://127.0.0.1:8000",json=input)
+
+
+
+res = requests.get("http://127.0.0.1:8000/run_robot",json=input)
 res.text
+res1 = requests.get("http://127.0.0.1:8000/get_status")
+res1.text

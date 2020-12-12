@@ -1,12 +1,16 @@
 from opentrons import protocol_api
 import json,timeit,time
 
+status = " "
+
 def _log_time(start_time,event = 'This step',print_log=1):
+    global status
     stop = timeit.default_timer()
     run_time = stop - start_time
     unit = "sec" if run_time<60 else "min"
     run_time = run_time/60 if unit == "min" else run_time
     log ='{} takes {:.2} {}'.format(event,run_time,unit)
+    status = log
     print (log) if print_log else 1
     return log+'\n'
 
@@ -137,12 +141,12 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         saliva_rack = json.loads(lw.biobank_96well_saliva_1000ul)
         rack_slots = ["6"]
         tips = [protocol.load_labware(tip_name, slot) for slot in tip_slots]
-        src_racks = [protocol.load_labware_from_definition(saliva_rack,slot,"saliva rack: biobank_96well_1000ul") for slot in rack_slots]
+        src_racks = [protocol.load_labware_from_definition(saliva_rack,slot,"saliva rack batch 1: biobank_96well_1000ul") for slot in rack_slots]
         src_tubes=[]
         for i in range(0,len(rack_slots)):
             src_tubes += src_racks[i].rows()[0]
         trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
-        dest_plate = protocol.load_labware(plate_name, plate_slot, "DTT plate: 96 well full skirt no adaptor" )
+        dest_plate = protocol.load_labware(plate_name, plate_slot, "DTT plate batch 1: 96 well full skirt no adaptor" )
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=tips)
         multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
@@ -159,12 +163,12 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         rack_slots = ["11"]
 
         tips_2 = [protocol.load_labware(tip_name, slot) for slot in tip_slots_2]
-        src_racks_2 = [protocol.load_labware_from_definition(saliva_rack,slot) for slot in rack_slots]
+        src_racks_2 = [protocol.load_labware_from_definition(saliva_rack,slot,"saliva rack batch 2: biobank_96well_1000ul") for slot in rack_slots]
         src_tubes_2=[]
         for i in range(0,len(rack_slots)):
             src_tubes_2 += src_racks_2[i].rows()[0]
         trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
-        dest_plate_2 = protocol.load_labware(plate_name, plate_slot)
+        dest_plate_2 = protocol.load_labware(plate_name, plate_slot,"DTT plate batch 2: 96 well full skirt no adaptor")
         multi_pipette_2 = multi_pipette
 #         multi_pipette_2.tip_racks = tips_2
 #         multi_pipette_2.trash_container = trash_2
@@ -264,7 +268,8 @@ def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
         return n_r_w
 
     for i in range(0,disp):
-        print ("current dispensing well is {}".format(well))
+        status="current dispensing well is {}".format(well)
+        print (status)
         pipette.dispense(volume, well.bottom(disp_bottom))
         well = _next_row_well(well)
 
@@ -297,7 +302,8 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
         st = timeit.default_timer() if get_time else 1
 
     multi_pipette.aspirate(asp_vol, s.bottom(asp_bottom))
-    print ("Aspirate {:.1f} uL from {}".format(asp_vol,s))
+    status = "Aspirate {:.1f} uL from {}".format(asp_vol,s)
+    print (status)
     multi_pipette.air_gap(air_vol)
     _log_time(st,event = 'Aspirate saliva') if get_time else 1
     st = timeit.default_timer() if get_time else 1
