@@ -21,10 +21,7 @@
 
 
 ##
-
-import requests,json,os
-import tkinter as tk
-
+import json,requests
 server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
 PORT = 8000

@@ -103,7 +103,6 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         self.Q.put(jsondata)
         # self.robot.initialize(jsondata)
         # self.robot.run(jsondata)
-
     def get_status(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")

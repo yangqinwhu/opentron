@@ -106,3 +106,5 @@ def test_run():
     }
     initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = True)
     run(**sample_info,**transfer_param)
+
+# test_run()

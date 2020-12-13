@@ -4,6 +4,10 @@ import json,timeit,time
 class robot:
     """robot class to perform common_taks operation
     """
+    def __init__(self):
+        self.status = "idle"
+        self.log =[]
+
     def _log_time(self,start_time,event = 'This step',print_log=1):
         stop = timeit.default_timer()
         run_time = stop - start_time
