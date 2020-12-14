@@ -26,7 +26,7 @@ server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
 PORT = 8000
 
-input={
+prot={
     "protocol":"saliva_to_dtt",
     "robot_status":{
         "initialized":0,
@@ -61,12 +61,10 @@ input={
 }
 
 
-
-
 with open('front_end/defaults/default_robot_input','rt') as f:
-    input=json.load(f)
+    prot=json.load(f)
 
-res = requests.get("http://127.0.0.1:8000/run_robot",json=input)
+res = requests.get("http://127.0.0.1:8000/run_robot",json=prot)
 res.text
 res1 = requests.get("http://127.0.0.1:8000/get_status")
 res1.text
