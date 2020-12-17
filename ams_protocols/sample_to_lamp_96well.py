@@ -20,7 +20,7 @@ def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
     pipette = ct.multi_pipette
     return deck_plan
 
-def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
+def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
     """
     Pipette: P20 mounted on the right
     1st set of labwares:
@@ -34,8 +34,9 @@ def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,as
     dest_tubes = ct.dest_plate.rows()[0]+ct.dest_plate_2.rows()[0]
     p = ct.multi_pipette
     p.tip_racks = ct.tips+ct.tips_2
-    tip_start = ct.tips[0]['A1']
+    # start_tip=1
     p.reset_tipracks()
+    p.starting_tip=ct.tips[0].rows()[0][start_tip-1]
     p.trash_container = ct.trash
 
 
@@ -76,6 +77,7 @@ def test_run():
         "total_batch":2,
         "start_batch":1,
         "start_tube":1,
+        "start_tip":1,
     }
     transfer_param={
         "samp_vol":5,

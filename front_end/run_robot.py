@@ -34,7 +34,7 @@ prot={
     },
     "robot_param":{
         "simulate":True,
-        "deck":"saliva_to_dtt_biobank_96well_1000ul",
+        "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
         "samples":8,

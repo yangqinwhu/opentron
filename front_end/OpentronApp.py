@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 import tkinter as tk
-import shutil
+# import shutil
 import json,requests
 
-SalivaToDTT={
+saliva_to_dtt={
     "protocol":"saliva_to_dtt",
     "robot_status":{
         "initialized":0,
@@ -12,25 +12,26 @@ SalivaToDTT={
     },
     "robot_param":{
         "simulate":True,
-        "deck":"saliva_to_dtt_biobank_96well_1000ul",
+        "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
         "samples":8,
         "sample_per_column":8,
-        "total_batch":2,
-        "start_batch":2,
+        "total_batch":1,
+        "start_batch":1,
         "start_tube":1,
-        "replicates":2,
+        "start_tip":1,
+        "replicates":1,
     },
     "transfer_param":{
         "samp_vol":50,
         "air_vol": 25,
         "disp":1,
-        "asp_bottom":10,
+        "asp_bottom":20,
         "disp_bottom":2,
         'mix':0,
         "get_time":1,
-        'dry_run':True,
+        'dry_run':False,
         "aspirate_rate": 120,
         "dispense_rate": 120,
         "tip_press_increment":0.3,
@@ -39,8 +40,44 @@ SalivaToDTT={
 }
 
 
+sample_to_lamp_96well={
+    "protocol":"sample_to_lamp_96well",
+    "robot_status":{
+        "initialized":0,
+        "to_run":1,
+    },
+    "robot_param":{
+        "simulate":True,
+        "deck":"sample_to_lamp_96well",
+    },
+    "sample_info":{
+        "samples":8,
+        "sample_per_column":8,
+        "total_batch":1,
+        "start_batch":1,
+        "start_tube":1,
+        "start_tip":1,
+        "replicates":2,
+    },
+    "transfer_param":{
+        "samp_vol":5,
+        "air_vol": 0,
+        "disp":1,
+        "asp_bottom":0,
+        "disp_bottom":0,
+        'mix':0,
+        "get_time":1,
+        'dry_run':False,
+        "aspirate_rate": 7.6,
+        "dispense_rate": 7.6,
+        "tip_press_increment":0.3,
+        "tip_presses" : 1,
+    },
+}
 
-class ScannerApp(tk.Tk):
+
+
+class OpentronApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Opentron app')
@@ -90,10 +127,11 @@ class RunPage(tk.Frame):
         super().__init__(parent)
         self.master = master
         self.parent=parent
-        self.robot_url="http://127.0.0.1:8000"
+        self.robot_url="http://192.168.1.46:8000"
+        # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
         self.form_row=0
-        # self.defaultParams=input
+        self.form_column=1
         self.para_confirmed=0
         self.create_widgets()
 
@@ -108,24 +146,22 @@ class RunPage(tk.Frame):
         ### Text output area
         self.frm_txt = tk.Text(self)
         self.frm_txt.place(
-            x=400,y=20,height=400,width=380)
+            x=600,y=20,height=400,width=180)
 
     def create_form(self,dic):
         for idx, text in enumerate(dic.keys()):
-            label = tk.Label(master=self, text=text,font=('Arial',8))
-            entry = tk.Entry(master=self, textvariable=dic[text],width=20,font=('Arial',8))
-            label.grid(row=idx+self.form_row, column=1,sticky="e")
-            entry.grid(row=idx+self.form_row, column=2,sticky="e")
-        self.form_row+=len(dic.keys())
-
+            label = tk.Label(master=self, text=text,width=10,font=('Arial',12))
+            entry = tk.Entry(master=self, textvariable=dic[text],width=10,font=('Arial',12))
+            label.grid(row=idx+self.form_row, column=self.form_column,sticky="e")
+            entry.grid(row=idx+self.form_row, column=self.form_column+1,sticky="e")
+        # self.form_row+=len(dic.keys())
     def create_forms(self,dic):
         """Parse input dic and create forms for multiple parameters"""
-
-        tk.Label(master=self, text="protocol").grid(
-            row=self.form_row, column=1, sticky="e")
-        entry = tk.Entry(master=self, width=20,font=('Arial',8))
+        tk.Label(master=self, text="protocol",font=('Arial',14)).grid(
+            row=self.form_row, column=self.form_column, sticky="w")
+        entry = tk.Entry(master=self, width=10,font=('Arial',14))
         entry.grid(
-            row=self.form_row, column=2, sticky="e")
+            row=self.form_row, column=self.form_column+1, sticky="w")
         k="protocol"
         entry.insert(0,dic[k])
         self.form_row+=1
@@ -138,24 +174,27 @@ class RunPage(tk.Frame):
                 else: var = tk.StringVar()
                 var.set(i)
                 self.run_params[form][k]=var
-            tk.Label(master=self, text = form,font=('Arial',10)).grid(
-                row=self.form_row, column=1, sticky="e")
+            tk.Label(master=self, text = form,font=('Arial',14)).grid(
+                row=self.form_row, column=self.form_column, sticky="w")
             self.form_row+=1
             self.create_form(self.run_params[form])
-        tk.Button(self, text ="Apply", font=('Arial',10),command=self.confirm_run_params).grid(
-            row=(self.form_row+1), column=1, sticky="e")
-        tk.Button(self, text ="Save", font=('Arial',10)).grid(
-            row=(self.form_row+1), column=2, sticky="w")
+            self.form_row=1
+            self.form_column+=2
+        ROW_MAX=max([len(i) if isinstance(i, dict) else 0 for i in self.run_params.values()])
+        tk.Button(self, text ="Apply", font=('Arial',12),command=self.confirm_run_params).grid(
+            row=(ROW_MAX+2), column=1, sticky="e")
+        tk.Button(self, text ="Save", font=('Arial',12)).grid(
+            row=(ROW_MAX+2), column=2, sticky="w")
 
     def create_buttons(self):
-        tk.Button(master=self,text='Run',font=('Arial',10),command=self.run_robot).grid(
-            row=0, column=0, sticky="e")
-        tk.Button(master=self,text='Home',font=('Arial',10)).grid(
-            row=1, column=0, sticky="e")
-        tk.Button(master=self,text='Stop',font=('Arial',10)).grid(
-            row=2, column=0, sticky="e")
-        tk.Button(master=self,text='Back',font=('Arial',10),command=self.goToHome).grid(
-            row=3, column=0, sticky="e")
+        tk.Button(master=self,text='Home',font=('Arial',12),command=self.init_robot).grid(
+            row=0, column=0, sticky="we")
+        tk.Button(master=self,text='Run',font=('Arial',12),command=self.run_robot).grid(
+            row=1, column=0, sticky="we")
+        tk.Button(master=self,text='Stop',font=('Arial',12)).grid(
+            row=2, column=0, sticky="we")
+        tk.Button(master=self,text='Back',font=('Arial',12),command=self.goToHome).grid(
+            row=3, column=0, sticky="we")
 
     def showPage(self):
         self.tkraise()
@@ -167,6 +206,17 @@ class RunPage(tk.Frame):
     def run_robot(self):
         if self.para_confirmed:
             url=self.robot_url+'/run_robot'
+            js=json.dumps(self.get_run_params())
+            res=requests.get(url,json=self.get_run_params())
+            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+            self.frm_txt.insert(tk.END,res.text)
+        else:
+            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+            self.frm_txt.insert(tk.END,"Please confirm the run parameters first by pressing Apply botton")
+
+    def init_robot(self):
+        if self.para_confirmed:
+            url=self.robot_url+'/init_robot'
             js=json.dumps(self.get_run_params())
             res=requests.get(url,json=self.get_run_params())
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
@@ -194,52 +244,14 @@ class RunPage(tk.Frame):
         self.para_confirmed=1
 
 class DTTPage(RunPage):
-    defaultParams=SalivaToDTT
+    defaultParams=saliva_to_dtt
     pass
-
 
 class LAMPPage(RunPage):
-    defaultParams=SalivaToDTT
+    defaultParams=sample_to_lamp_96well
     pass
 
 
-
-
-
-app = ScannerApp()
+app = OpentronApp()
 app.protocol('WM_DELETE_WINDOW',app.on_closing)
 app.mainloop()
-# parent = tk.Frame()
-# h=HomePage(parent,app)
-# HomePage.__name__
-
-#
-# import tkinter as tk
-#
-# class MyApp():
-#     def __init__(self):
-#         self.root = tk.Tk()
-#         l1 = tk.Label(self.root, text="Hello")
-#         l2 = tk.Label(self.root, text="World")
-#         l1.grid(row=0, column=0, )
-#         l2.grid(row=1, column=0, )
-#
-# app = MyApp()
-# app.root.mainloop()
-
-# window.title("Simple Text Editor")
-# window.rowconfigure(0, minsize=800, weight=1)
-# window.columnconfigure(1, minsize=800, weight=1)
-#
-# txt_edit = tk.Text(window)
-# fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
-# btn_open = tk.Button(fr_buttons, text="Open", command=open_file)
-# btn_save = tk.Button(fr_buttons, text="Save As...", command=save_file)
-#
-# btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-# btn_save.grid(row=1, column=0, sticky="ew", padx=5)
-#
-# fr_buttons.grid(row=0, column=0, sticky="ns")
-# txt_edit.grid(row=0, column=1, sticky="nsew")
-#
-# window.mainloop()

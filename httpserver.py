@@ -75,6 +75,11 @@ class SimpleHandler(BaseHTTPRequestHandler,):
             # redirect / to /index
             path = self.path.strip('/') or 'index'
             print(path)
+            if path =="init_robot":
+                self.init_robot()
+
+                self.sendData(f"Robot initializing\n {str(self.robot.deck_plan)} ",'text/html')
+                # self.sendMAP(json.dumps(self.robot.deck_plan))
             if path =="run_robot":
                 self.run_robot()
                 self.sendData("Run started",'text/html')
@@ -99,10 +104,21 @@ class SimpleHandler(BaseHTTPRequestHandler,):
        return self.abort404()
 
     def run_robot(self):
+        to_do="run"
         jsondata = self.json()
+        self.Q.put(to_do)
         self.Q.put(jsondata)
         # self.robot.initialize(jsondata)
         # self.robot.run(jsondata)
+
+    def init_robot(self):
+        to_do="initialize"
+        jsondata = self.json()
+        self.Q.put(to_do)
+        self.Q.put(jsondata)
+        # self.robot.initialize(jsondata)
+        # self.robot.run(jsondata)
+
     def get_status(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -112,7 +128,8 @@ class SimpleHandler(BaseHTTPRequestHandler,):
 class RunRobot:
     def __init__(self):
         self.prot=""
-        self.status="Not initialized"
+        self.status="Robot not initialized"
+        self.deck_plan={1:"Deck not initialized"}
     def sele(self,name):
         self.prot = name
     def initialize(self,jsondata):
@@ -123,7 +140,7 @@ class RunRobot:
             # self.sele('sample_to_lamp_96well')
             self.prot=sample_to_lamp_96well
         if not jsondata["robot_status"]["initialized"]:
-            self.prot.initialize_robot(**jsondata["robot_param"])
+            self.deck_plan=self.prot.initialize_robot(**jsondata["robot_param"])
             print ("opentron initialized")
             self.status = "Robot Initialized"
     def run(self,jsondata):
@@ -153,6 +170,9 @@ while True:
     if msq.empty():
         time.sleep(0.1)
         continue
-    jsondata = msq.get()
-    robot.initialize(jsondata)
-    robot.run(jsondata)
+    to_do= msq.get()
+    jsondata =msq.get()
+    if to_do =="initialize":
+        robot.initialize(jsondata)
+    if to_do =="run":
+        robot.run(jsondata)

@@ -16,14 +16,14 @@ importlib.reload(ct)
 
 status = ct.status
 
-def initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = True,**kwarg):
+def initialize_robot(deck = "saliva_to_dtt_micronic_96_wellplate_1400ul",simulate = True,**kwarg):
     ct.load_deck(deck,simulate = simulate)
     deck_plan = ct.protocol.deck
     pipette = ct.multi_pipette
     return deck_plan
 
 
-def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
+def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -38,16 +38,16 @@ def run_batch(start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0
         dest_tubes = ct.dest_plate.rows()[0]
         p = ct.multi_pipette
         p.tip_racks = ct.tips
-        tip_start = ct.tips[0]['A1']
         p.reset_tipracks()
+        p.starting_tip=ct.tips[0].rows()[0][start_tip-1]
         p.trash_container = ct.trash
     else:
         src_tubes = ct.src_tubes_2
         dest_tubes = ct.dest_plate_2.rows()[0]
         p = ct.multi_pipette
         p.tip_racks = ct.tips_2
-        tip_start = ct.tips_2[0]['A1']
         p.reset_tipracks()
+        p.starting_tip=ct.tips_2[0].rows()[0][start_tip-1]
         p.trash_container = ct.trash_2
 
     p.flow_rate.aspirate = aspirate_rate
@@ -88,6 +88,7 @@ def test_run():
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
+        "start_tip":2,
         "replicates":1,
     }
     transfer_param={
@@ -104,7 +105,7 @@ def test_run():
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     }
-    initialize_robot(deck = "saliva_to_dtt_biobank_96well_1000ul",simulate = True)
+    initialize_robot(deck = "saliva_to_dtt_micronic_96_wellplate_1400ul",simulate = True)
     run(**sample_info,**transfer_param)
 
 # test_run()
