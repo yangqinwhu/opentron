@@ -20,6 +20,15 @@ def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
     pipette = ct.multi_pipette
     return deck_plan
 
+def pause_robot():
+    ct.protocol.pause(msg="robot paused")
+    status = "robot paused"
+
+def resume_robot():
+    ct.protocol.resume()
+    status = "protocol resumed"
+
+
 def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
     """
     Pipette: P20 mounted on the right

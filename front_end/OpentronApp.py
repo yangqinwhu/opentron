@@ -191,10 +191,13 @@ class RunPage(tk.Frame):
             row=0, column=0, sticky="we")
         tk.Button(master=self,text='Run',font=('Arial',12),command=self.run_robot).grid(
             row=1, column=0, sticky="we")
-        tk.Button(master=self,text='Stop',font=('Arial',12)).grid(
+        tk.Button(master=self,text='Pause',font=('Arial',12),command=self.pause_robot).grid(
             row=2, column=0, sticky="we")
-        tk.Button(master=self,text='Back',font=('Arial',12),command=self.goToHome).grid(
+        tk.Button(master=self,text='Resume',font=('Arial',12),command=self.resume_robot).grid(
             row=3, column=0, sticky="we")
+
+        tk.Button(master=self,text='Back',font=('Arial',12),command=self.goToHome).grid(
+            row=4, column=0, sticky="we")
 
     def showPage(self):
         self.tkraise()
@@ -224,6 +227,15 @@ class RunPage(tk.Frame):
         else:
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
             self.frm_txt.insert(tk.END,"Please confirm the run parameters first by pressing Apply botton")
+
+    def pause_robot(self):
+        url=self.robot_url+'/pause'
+        res=requests.get(url,json=self.get_run_params())
+
+    def resume_robot(self):
+        url=self.robot_url+'/resume'
+        res=requests.get(url,json=self.get_run_params())
+
 
     def get_run_params(self):
         para = self.defaultParams

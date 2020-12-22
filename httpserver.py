@@ -8,7 +8,7 @@ import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 server_ip = "192.168.1.46"
-server_ip = "127.0.0.1"
+# server_ip = "127.0.0.1"
 PORT = 8000
 
 
@@ -80,9 +80,15 @@ class SimpleHandler(BaseHTTPRequestHandler,):
 
                 self.sendData(f"Robot initializing\n {str(self.robot.deck_plan)} ",'text/html')
                 # self.sendMAP(json.dumps(self.robot.deck_plan))
-            if path =="run_robot":
+            elif path =="run_robot":
                 self.run_robot()
                 self.sendData("Run started",'text/html')
+            elif path =="pause":
+                self.pause_robot()
+                self.sendData("Run paused",'text/html')
+            elif path =="resume":
+                self.pause_robot()
+                self.sendData("Run paused",'text/html')
             elif path=="get_status":
                 self.get_status()
         except:
@@ -119,6 +125,19 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         # self.robot.initialize(jsondata)
         # self.robot.run(jsondata)
 
+    def pause_robot(self):
+        to_do="pause"
+        jsondata = self.json()
+        self.Q.put(to_do)
+        self.Q.put(jsondata)
+        # self.robot.initialize(jsondata)
+        # self.robot.run(jsondata)
+    def resume_robot(self):
+        to_do="resume"
+        jsondata = self.json()
+        self.Q.put(to_do)
+        self.Q.put(jsondata)
+
     def get_status(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -147,8 +166,15 @@ class RunRobot:
         if jsondata["robot_status"]["to_run"]:
             self.prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
             self.status = "Run finished"
+    def pause(self):
+        self.prot.pause_robot()
+        self.status = "Run Paused"
+    def resume(self):
+        self.prot.resume_robot()
+
     def get_status(self):
         self.status=self.prot.status
+        self.status = "Run Resumed"
 
 
 def startserver():
@@ -174,5 +200,9 @@ while True:
     jsondata =msq.get()
     if to_do =="initialize":
         robot.initialize(jsondata)
-    if to_do =="run":
+    elif to_do =="run":
         robot.run(jsondata)
+    elif to_do=="pause":
+        robot.pause()
+    elif to_do=="resume":
+        robot.resume()

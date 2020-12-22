@@ -22,6 +22,13 @@ def initialize_robot(deck = "saliva_to_dtt_micronic_96_wellplate_1400ul",simulat
     pipette = ct.multi_pipette
     return deck_plan
 
+def pause_robot():
+    ct.protocol.pause(msg="robot paused")
+    status = "robot paused"
+
+def resume_robot():
+    ct.protocol.resume()
+    status = "protocol resumed"
 
 def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
     """
