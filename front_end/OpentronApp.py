@@ -77,6 +77,8 @@ sample_to_lamp_96well={
 }
 
 
+BOTTON_FONT=12
+LABEL_FONT=10
 
 class OpentronApp(tk.Tk):
     def __init__(self):
@@ -127,8 +129,7 @@ class RunPage(tk.Frame):
     """Parameters in the essential will be displayed seperately.
     Other parameters will only display in the developer page"""
 
-    BOTTON_FONT=12
-    LABEL_FONT=10
+
 
     def __init__(self,parent,master):
         super().__init__(parent)
