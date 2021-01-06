@@ -129,8 +129,6 @@ class RunPage(tk.Frame):
     """Parameters in the essential will be displayed seperately.
     Other parameters will only display in the developer page"""
 
-
-
     def __init__(self,parent,master):
         super().__init__(parent)
         self.master = master
@@ -183,7 +181,7 @@ class RunPage(tk.Frame):
                 else: var = tk.StringVar()
                 var.set(i)
                 self.run_params[form][k]=var
-            tk.Label(master=self, text = form,font=('Arial',14)).grid(
+            tk.Label(master=self, text = form,font=('Arial',LABEL_FONT+2)).grid(
                 row=self.form_row, column=self.form_column, sticky="w")
             self.form_row+=1
             self.create_form(self.run_params[form])
