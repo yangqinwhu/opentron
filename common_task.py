@@ -39,6 +39,7 @@ def initialize(simulate =False,**kwarg):
     protocol.home()
     return protocol
 
+
 def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
     global tips_2,src_racks_2,src_tubes_2,trash_2,dest_plate_2
     global tips,src_racks,src_tubes,trash,dest_plate,multi_pipette

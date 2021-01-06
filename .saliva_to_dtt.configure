@@ -1,0 +1,34 @@
+{
+  "protocol": "saliva_to_dtt",
+  "robot_status": {
+    "initialized": 0,
+    "to_run": 1
+  },
+  "robot_param": {
+    "simulate": 1,
+    "deck": "saliva_to_dtt_micronic_96_wellplate_1400ul"
+  },
+  "sample_info": {
+    "samples": 8,
+    "sample_per_column": 8,
+    "total_batch": 1,
+    "start_batch": 1,
+    "start_tube": 1,
+    "start_tip": 1,
+    "replicates": 3
+  },
+  "transfer_param": {
+    "samp_vol": 50,
+    "air_vol": 25,
+    "disp": 1,
+    "asp_bottom": 20,
+    "disp_bottom": 2,
+    "mix": 0,
+    "get_time": 1,
+    "dry_run": 0,
+    "aspirate_rate": 120,
+    "dispense_rate": 120,
+    "tip_press_increment": 0.3,
+    "tip_presses": 1
+  }
+}

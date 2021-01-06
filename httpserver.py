@@ -77,7 +77,6 @@ class SimpleHandler(BaseHTTPRequestHandler,):
             print(path)
             if path =="init_robot":
                 self.init_robot()
-
                 self.sendData(f"Robot initializing\n {str(self.robot.deck_plan)} ",'text/html')
                 # self.sendMAP(json.dumps(self.robot.deck_plan))
             elif path =="run_robot":

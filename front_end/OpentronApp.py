@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 import tkinter as tk
@@ -76,7 +77,6 @@ sample_to_lamp_96well={
 }
 
 
-
 class OpentronApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -123,6 +123,11 @@ class HomePage(tk.Frame):
         self.focus_set()
 
 class RunPage(tk.Frame):
+
+    """Parameters in the essential will be displayed seperately.
+    Other parameters will only display in the developer page"""
+
+
     def __init__(self,parent,master):
         super().__init__(parent)
         self.master = master
@@ -130,6 +135,7 @@ class RunPage(tk.Frame):
         self.robot_url="http://192.168.1.46:8000"
         # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
+        self.essential = ["simulate","samples","start_tip","replicates"]
         self.form_row=0
         self.form_column=1
         self.para_confirmed=0
@@ -140,7 +146,6 @@ class RunPage(tk.Frame):
         self.create_buttons()
 
         ### Input area
-
         self.create_forms(self.defaultParams)
 
         ### Text output area
@@ -155,6 +160,7 @@ class RunPage(tk.Frame):
             label.grid(row=idx+self.form_row, column=self.form_column,sticky="e")
             entry.grid(row=idx+self.form_row, column=self.form_column+1,sticky="e")
         # self.form_row+=len(dic.keys())
+
     def create_forms(self,dic):
         """Parse input dic and create forms for multiple parameters"""
         tk.Label(master=self, text="protocol",font=('Arial',14)).grid(
@@ -183,7 +189,7 @@ class RunPage(tk.Frame):
         ROW_MAX=max([len(i) if isinstance(i, dict) else 0 for i in self.run_params.values()])
         tk.Button(self, text ="Apply", font=('Arial',12),command=self.confirm_run_params).grid(
             row=(ROW_MAX+2), column=1, sticky="e")
-        tk.Button(self, text ="Save", font=('Arial',12)).grid(
+        tk.Button(self, text ="Save", font=('Arial',12),command=self.save_run_params).grid(
             row=(ROW_MAX+2), column=2, sticky="w")
 
     def create_buttons(self):
@@ -195,7 +201,6 @@ class RunPage(tk.Frame):
             row=2, column=0, sticky="we")
         tk.Button(master=self,text='Resume',font=('Arial',12),command=self.resume_robot).grid(
             row=3, column=0, sticky="we")
-
         tk.Button(master=self,text='Back',font=('Arial',12),command=self.goToHome).grid(
             row=4, column=0, sticky="we")
 
@@ -236,8 +241,7 @@ class RunPage(tk.Frame):
         url=self.robot_url+'/resume'
         res=requests.get(url,json=self.get_run_params())
 
-
-    def get_run_params(self):
+    def get_run_params_1(self):
         para = self.defaultParams
         for f in self.forms:
             para.pop(f)
@@ -249,18 +253,47 @@ class RunPage(tk.Frame):
                     para[f][k] = self.defaultParams[f][k]
         return para
 
+    def get_run_params(self):
+        para = {}
+        for f in self.defaultParams.keys():
+            para[f]={}
+            if isinstance(self.defaultParams[f],dict):
+                for k,i in self.defaultParams[f].items():
+                    try:
+                        para[f][k]=self.run_params[f][k].get()
+                    except:
+                        para[f][k] = self.defaultParams[f][k]
+            else:
+                para[f]=self.defaultParams[f]
+        return para
+
     def confirm_run_params(self):
         js=json.dumps(self.get_run_params(),indent=4)
         self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
         self.frm_txt.insert(tk.END,js)
         self.para_confirmed=1
 
+    def save_run_params(self):
+        para=self.get_run_params()
+        pp=f".{self.defaultParams['protocol']}.configure"
+        with open(pp, 'wt') as f:
+            json.dump(para, f, indent=2)
+        f.close()
+
 class DTTPage(RunPage):
-    defaultParams=saliva_to_dtt
+    pp=f".saliva_to_dtt.configure"
+    if os.path.exists(pp):
+        defaultParams = json.load(open(pp, 'rt'))
+    else:
+        defaultParams=saliva_to_dtt
     pass
 
 class LAMPPage(RunPage):
-    defaultParams=sample_to_lamp_96well
+    pp=f".sample_to_lamp_96well.configure"
+    if os.path.exists(pp):
+        defaultParams = json.load(open(pp, 'rt'))
+    else:
+        defaultParams=sample_to_lamp_96well
     pass
 
 
