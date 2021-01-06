@@ -78,7 +78,7 @@ sample_to_lamp_96well={
 
 
 BOTTON_FONT=12
-LABEL_FONT=10
+LABEL_FONT=8
 
 class OpentronApp(tk.Tk):
     def __init__(self):
