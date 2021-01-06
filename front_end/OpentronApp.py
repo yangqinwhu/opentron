@@ -114,9 +114,9 @@ class HomePage(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',40),command=lambda:self.master.showPage('DTTPage')).place(
+        tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),command=lambda:self.master.showPage('DTTPage')).place(
             x=20,y=40,height=150,width=360)
-        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',40),command=lambda:self.master.showPage('LAMPPage')).place(
+        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
             x=420,y=40,height=150,width=360)
         tk.Button(self,text='Exit',font=('Arial',60),command=self.master.on_closing).place(
             x=20,y=210,height=150,width=360)
