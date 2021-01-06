@@ -77,6 +77,7 @@ sample_to_lamp_96well={
 }
 
 
+
 class OpentronApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -123,10 +124,11 @@ class HomePage(tk.Frame):
         self.focus_set()
 
 class RunPage(tk.Frame):
-
     """Parameters in the essential will be displayed seperately.
     Other parameters will only display in the developer page"""
 
+    BOTTON_FONT=12
+    LABEL_FONT=10
 
     def __init__(self,parent,master):
         super().__init__(parent)
@@ -155,17 +157,17 @@ class RunPage(tk.Frame):
 
     def create_form(self,dic):
         for idx, text in enumerate(dic.keys()):
-            label = tk.Label(master=self, text=text,width=10,font=('Arial',12))
-            entry = tk.Entry(master=self, textvariable=dic[text],width=10,font=('Arial',12))
+            label = tk.Label(master=self, text=text,width=10,font=('Arial',LABEL_FONT))
+            entry = tk.Entry(master=self, textvariable=dic[text],width=10,font=('Arial',LABEL_FONT))
             label.grid(row=idx+self.form_row, column=self.form_column,sticky="e")
             entry.grid(row=idx+self.form_row, column=self.form_column+1,sticky="e")
         # self.form_row+=len(dic.keys())
 
     def create_forms(self,dic):
         """Parse input dic and create forms for multiple parameters"""
-        tk.Label(master=self, text="protocol",font=('Arial',14)).grid(
+        tk.Label(master=self, text="protocol",font=('Arial',LABEL_FONT)).grid(
             row=self.form_row, column=self.form_column, sticky="w")
-        entry = tk.Entry(master=self, width=10,font=('Arial',14))
+        entry = tk.Entry(master=self, width=10,font=('Arial',LABEL_FONT))
         entry.grid(
             row=self.form_row, column=self.form_column+1, sticky="w")
         k="protocol"
@@ -187,21 +189,21 @@ class RunPage(tk.Frame):
             self.form_row=1
             self.form_column+=2
         ROW_MAX=max([len(i) if isinstance(i, dict) else 0 for i in self.run_params.values()])
-        tk.Button(self, text ="Apply", font=('Arial',12),command=self.confirm_run_params).grid(
+        tk.Button(self, text ="Apply", font=('Arial',BOTTON_FONT),command=self.confirm_run_params).grid(
             row=(ROW_MAX+2), column=1, sticky="e")
-        tk.Button(self, text ="Save", font=('Arial',12),command=self.save_run_params).grid(
+        tk.Button(self, text ="Save", font=('Arial',BOTTON_FONT),command=self.save_run_params).grid(
             row=(ROW_MAX+2), column=2, sticky="w")
 
     def create_buttons(self):
-        tk.Button(master=self,text='Home',font=('Arial',12),command=self.init_robot).grid(
+        tk.Button(master=self,text='Home',font=('Arial',BOTTON_FONT),command=self.init_robot).grid(
             row=0, column=0, sticky="we")
-        tk.Button(master=self,text='Run',font=('Arial',12),command=self.run_robot).grid(
+        tk.Button(master=self,text='Run',font=('Arial',BOTTON_FONT),command=self.run_robot).grid(
             row=1, column=0, sticky="we")
-        tk.Button(master=self,text='Pause',font=('Arial',12),command=self.pause_robot).grid(
+        tk.Button(master=self,text='Pause',font=('Arial',BOTTON_FONT),command=self.pause_robot).grid(
             row=2, column=0, sticky="we")
-        tk.Button(master=self,text='Resume',font=('Arial',12),command=self.resume_robot).grid(
+        tk.Button(master=self,text='Resume',font=('Arial',BOTTON_FONT),command=self.resume_robot).grid(
             row=3, column=0, sticky="we")
-        tk.Button(master=self,text='Back',font=('Arial',12),command=self.goToHome).grid(
+        tk.Button(master=self,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome).grid(
             row=4, column=0, sticky="we")
 
     def showPage(self):
@@ -218,9 +220,11 @@ class RunPage(tk.Frame):
             res=requests.get(url,json=self.get_run_params())
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
             self.frm_txt.insert(tk.END,res.text)
+            self.frm_txt.see(tk.END)
         else:
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
             self.frm_txt.insert(tk.END,"Please confirm the run parameters first by pressing Apply botton")
+            self.frm_txt.see(tk.END)
 
     def init_robot(self):
         if self.para_confirmed:
@@ -242,6 +246,7 @@ class RunPage(tk.Frame):
         res=requests.get(url,json=self.get_run_params())
 
     def get_run_params_1(self):
+        #to be deleted after running the robot
         para = self.defaultParams
         for f in self.forms:
             para.pop(f)
@@ -271,6 +276,7 @@ class RunPage(tk.Frame):
         js=json.dumps(self.get_run_params(),indent=4)
         self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
         self.frm_txt.insert(tk.END,js)
+        self.frm_txt.see(tk.END)
         self.para_confirmed=1
 
     def save_run_params(self):
