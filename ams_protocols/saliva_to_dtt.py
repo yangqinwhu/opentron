@@ -30,7 +30,7 @@ def resume_robot():
     ct.protocol.resume()
     status = "protocol resumed"
 
-def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
+def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -65,7 +65,7 @@ def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,asp
     for i in src_tubes[(start_tube-1):(sample_c+start_tube-1)]:
         for j in range(0,replicates):
             sts.append(i)
-    dts = dest_tubes[(start_tube-1):(sample_c*replicates+start_tube-1)]
+    dts = dest_tubes[(start_dest-1):(sample_c*replicates+start_dest-1)]
     print (len(sts))
     print (len(dts))
     if len(sts)>len(dts):
@@ -77,9 +77,6 @@ def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,asp
 
     ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
     print ("####################### BATCH END ######################")
-
-
-
 
 def run(total_batch=2,start_batch=1,**kwarg):
     batch = start_batch
@@ -95,18 +92,20 @@ def test_run():
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
+        "start_dest":1,
         "start_tip":2,
         "replicates":1,
     }
     transfer_param={
         "samp_vol":50,
+        "reverse_vol":20,
         "air_vol": 25,
         "disp":1,
         "asp_bottom":10,
         "disp_bottom":2,
         'mix':0,
         "get_time":1,
-        'dry_run':False,
+        'returnTip':False,
         "aspirate_rate": 120,
         "dispense_rate": 120,
         "tip_press_increment":0.3,

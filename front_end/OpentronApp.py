@@ -21,18 +21,20 @@ saliva_to_dtt={
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
+        "start_dest":1,
         "start_tip":1,
         "replicates":1,
     },
     "transfer_param":{
         "samp_vol":50,
+        "reverse_vol":0,
         "air_vol": 25,
         "disp":1,
         "asp_bottom":20,
         "disp_bottom":2,
         'mix':0,
         "get_time":1,
-        'dry_run':False,
+        'returnTip':False,
         "aspirate_rate": 120,
         "dispense_rate": 120,
         "tip_press_increment":0.3,
@@ -57,18 +59,60 @@ sample_to_lamp_96well={
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
+        "start_dest":1,
         "start_tip":1,
         "replicates":2,
+        "repl_chg_tip":0,
     },
     "transfer_param":{
         "samp_vol":5,
+        "reverse_vol":0,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
         "disp_bottom":0,
         'mix':0,
         "get_time":1,
-        'dry_run':False,
+        'returnTip':False,
+        "aspirate_rate": 7.6,
+        "dispense_rate": 7.6,
+        "tip_press_increment":0.3,
+        "tip_presses" : 1,
+    },
+}
+
+
+aliquot_p20_96well={
+    "protocol":"sample_to_lamp_96well",
+    "robot_status":{
+        "initialized":0,
+        "to_run":1,
+    },
+    "robot_param":{
+        "simulate":True,
+        "deck":"sample_to_lamp_96well",
+    },
+    "sample_info":{
+        "samples":8,
+        "sample_per_column":8,
+        "total_batch":1,
+        "start_batch":1,
+        "start_tube":1,
+        "start_dest":1,
+        "start_tip":1,
+        "replicates":2,
+        "repl_chg_tip":0,
+    },
+    "transfer_param":{
+        "samp_vol":10,
+        "reverse_vol":3,
+        "air_vol": 0,
+        "disp":1,
+        "asp_bottom":0,
+        "disp_bottom":0,
+        'mix':0,
+        "get_time":1,
+        'returnTip':False,
         "aspirate_rate": 7.6,
         "dispense_rate": 7.6,
         "tip_press_increment":0.3,
@@ -94,7 +138,7 @@ class OpentronApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.pages = {}
-        for F in (HomePage,DTTPage,LAMPPage):
+        for F in (HomePage,DTTPage,LAMPPage,AliquotDTTPage,AliquotLAMPPage):
              self.pages[F.__name__] = F(parent=container,master=self)
              self.pages[F.__name__].grid(row=0, column=0, sticky="nsew")
 
@@ -118,8 +162,12 @@ class HomePage(tk.Frame):
             x=20,y=40,height=150,width=360)
         tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
             x=420,y=40,height=150,width=360)
-        tk.Button(self,text='Exit',font=('Arial',60),command=self.master.on_closing).place(
+        tk.Button(self,text='Aliquot DTT \n P20',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
             x=20,y=210,height=150,width=360)
+        tk.Button(self,text='Aliquot LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
+            x=420,y=210,height=150,width=360)
+        tk.Button(self,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
+            x=340,y=380,height=50,width=120)
 
     def showPage(self):
         self.tkraise()
@@ -280,13 +328,14 @@ class RunPage(tk.Frame):
 
     def save_run_params(self):
         para=self.get_run_params()
-        pp=f".{self.defaultParams['protocol']}.configure"
+        pp=f".{self.config}.configure"
         with open(pp, 'wt') as f:
             json.dump(para, f, indent=2)
         f.close()
 
 class DTTPage(RunPage):
-    pp=f".saliva_to_dtt.configure"
+    config="saliva_to_dtt"
+    pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -294,11 +343,30 @@ class DTTPage(RunPage):
     pass
 
 class LAMPPage(RunPage):
-    pp=f".sample_to_lamp_96well.configure"
+    config="sample_to_lamp_96well"
+    pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
         defaultParams=sample_to_lamp_96well
+    pass
+
+class AliquotDTTPage(RunPage):
+    config="aliquot_to_dtt_96well"
+    pp=f".{config}.configure"
+    if os.path.exists(pp):
+        defaultParams = json.load(open(pp, 'rt'))
+    else:
+        defaultParams=aliquot_p20_96well
+    pass
+
+class AliquotLAMPPage(RunPage):
+    config="saliquot_to_lamp_96well"
+    pp=f".{config}.configure"
+    if os.path.exists(pp):
+        defaultParams = json.load(open(pp, 'rt'))
+    else:
+        defaultParams=aliquot_p20_96well
     pass
 
 

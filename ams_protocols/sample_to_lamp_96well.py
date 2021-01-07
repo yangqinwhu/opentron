@@ -3,15 +3,16 @@ Use lamp_setup_app.py to calibrate all labware first
 If you need to control gpios, first stop the robot server with systemctl stop opentrons-robot-server. Until you restart the server with systemctl start opentrons-robot-server, you will be unable to control the robot using the Opentrons app.
 """
 
-from opentrons import protocol_api
+
 # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
+import sys,json
+# sys.path.append("/var/lib/jupyter/notebooks")
+sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
+from opentrons import protocol_api
 import json,timeit,time
 import common_task as ct
 import importlib
 importlib.reload(ct)
-import sys,json
-# sys.path.append("/var/lib/jupyter/notebooks")
-sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
 
 def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
@@ -29,7 +30,7 @@ def resume_robot():
     status = "protocol resumed"
 
 
-def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,**kwarg):
+def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per_column=8,replicates=1,aspirate_rate=0,dispense_rate=0,repl_chg_tip=False,**kwarg):
     """
     Pipette: P20 mounted on the right
     1st set of labwares:
@@ -48,7 +49,6 @@ def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,rep
     p.starting_tip=ct.tips[0].rows()[0][start_tip-1]
     p.trash_container = ct.trash
 
-
     # p.flow_rate.aspirate = aspirate_rate
     # p.flow_rate.dispense = dispense_rate
     start = timeit.default_timer()
@@ -57,17 +57,30 @@ def run_batch(start_tip=1,start_tube=1,batch=1,samples=8,sample_per_column=8,rep
     for i in src_tubes[(start_tube-1):(sample_c+start_tube-1)]:
         for j in range(0,replicates):
             sts.append(i)
-    dts = dest_tubes[(start_tube-1):(sample_c*replicates+start_tube-1)]
-    print (len(sts))
-    print (len(dts))
+    dts = dest_tubes[(start_dest-1):(sample_c*replicates+start_dest-1)]
+    # print (len(sts))
+    # print (len(dts))
     if len(sts)>len(dts):
         raise Exception("Destination plate well is less than sample well. Please double check sample and replicate number.")
+
+    rev_vol=kwarg["reverse_vol"]
+    rev_status=0
     for i, (s, d) in enumerate(zip(sts,dts)):
         p.trash_container = ct.trash_2 if i > 11 else ct.trash
-        print ("Start transfering sample to lamp MM plate")
-        run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
-        print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
+        # print ("Start transfering sample to lamp MM plate")
+        if repl_chg_tip == False and (i+1)%replicates!=0:
+            kwarg.update({"chgTip":0})
+        else:
+            kwarg.update({"chgTip":1})
 
+        if rev_status==0:
+            kwarg.update({"reverse_pip":1})
+            rev_status=1
+        else:
+            kwarg.update({"reverse_pip":0})
+        run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
+        rev_status=0 if kwarg["chgTip"] else 1
+        print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
     ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
     print ("####################### BATCH END ######################")
 
@@ -80,23 +93,26 @@ def run(total_batch=2,start_batch=1,**kwarg):
 def test_run():
     """This function is to run this file locally with all the parameters"""
     sample_info={
-        "samples":8,
+        "samples":16,
         "sample_per_column":8,
-        "replicates":2,
-        "total_batch":2,
+        "replicates":3,
+        "repl_chg_tip":0,
+        "total_batch":1,
         "start_batch":1,
         "start_tube":1,
+        "start_dest":1,
         "start_tip":1,
     }
     transfer_param={
         "samp_vol":5,
+        "reverse_vol":5,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
         "disp_bottom":0,
         'mix':0,
         "get_time":1,
-        'dry_run':False,
+        'returnTip':False,
         "aspirate_rate": 7.6,
         "dispense_rate": 7.6,
         "tip_press_increment":0.3,
