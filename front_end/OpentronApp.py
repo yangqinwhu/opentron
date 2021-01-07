@@ -106,7 +106,7 @@ aliquot_p20_96well={
     "transfer_param":{
         "samp_vol":10,
         "reverse_vol":3,
-        "blowout":0
+        "blowout":0,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
