@@ -34,7 +34,7 @@ def initialize(simulate =False,**kwarg):
         protocol = opentrons.simulate.get_protocol_api('2.1')
     else:
         import opentrons.execute # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
-        protocol = opentrons.execute.get_protocol_api('2.3')
+        protocol = opentrons.execute.get_protocol_api('2.7')
     protocol = protocol
     protocol.home()
     return protocol
@@ -180,7 +180,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
     elif deck_plan == 'sample_to_lamp':
         # for 1st shift
         protocol = initialize(simulate =simulate,**kwarg)
-        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_name = "opentrons_96_filtertiprack_20ul"
         p20_tip_slots = ["5","4"]
         right_pip_name = "p20_multi_gen2"
         plate_name = json.loads(lw.geb_96_wellplate)
@@ -216,7 +216,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
     elif deck_plan == 'sample_to_lamp_96well':
         # for 1st shift
         protocol = initialize(simulate =simulate,**kwarg)
-        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_name = "opentrons_96_filtertiprack_20ul"
         p20_tip_slots = ["2"]
         right_pip_name = "p20_multi_gen2"
         plate_name = "nest_96_wellplate_100ul_pcr_full_skirt"

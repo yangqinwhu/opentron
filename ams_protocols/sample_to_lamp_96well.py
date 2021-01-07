@@ -14,6 +14,13 @@ import common_task as ct
 import importlib
 importlib.reload(ct)
 
+def _split_volume(samp_vol,rev_vol,n):
+    if (samp_vol+rev_vol)>10:
+        samp_vol=samp_vol/2
+        n*=2
+        return samp_vol,rev_vol,n
+    else:
+        return samp_vol,rev_vol,n
 
 def initialize_robot(deck = "sample_to_lamp_96well",simulate = True,**kwarg):
     ct.load_deck(deck,simulate = simulate)
@@ -64,7 +71,9 @@ def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per
         raise Exception("Destination plate well is less than sample well. Please double check sample and replicate number.")
 
     rev_vol=kwarg["reverse_vol"]
+    samp_vol=kwarg["samp_vol"]
     rev_status=0
+    total_vol=rev_vol+samp_vol
     for i, (s, d) in enumerate(zip(sts,dts)):
         p.trash_container = ct.trash_2 if i > 11 else ct.trash
         # print ("Start transfering sample to lamp MM plate")
@@ -104,8 +113,8 @@ def test_run():
         "start_tip":1,
     }
     transfer_param={
-        "samp_vol":5,
-        "reverse_vol":5,
+        "samp_vol":10,
+        "reverse_vol":3,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
@@ -121,4 +130,4 @@ def test_run():
     initialize_robot(deck = "sample_to_lamp_96well",simulate = True)
     run(**sample_info,**transfer_param)
 
-# test_run()
+test_run()
