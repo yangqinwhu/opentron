@@ -23,8 +23,8 @@ micronic_96_wellplate_1400ul = """{"ordering":[["A1","B1","C1","D1","E1","F1","G
 metadata = {'apiLevel': '2.7'}
 
 def run(protocol):
-    cali_p20=False
-    cali_p200=True
+    cali_p20=True
+    cali_p200=False
     if cali_p200:
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
         p200_tip_slots = ["2"]
@@ -32,7 +32,7 @@ def run(protocol):
         p200_tips = [protocol.load_labware(p200_tip_name, slot) for slot in p200_tip_slots]
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
     elif cali_p20:
-        p20_tip_name = "geb_96_tiprack_10ul"
+        p20_tip_name = "opentrons_96_filtertiprack_20ul"
         p20_tip_slots = ["1"]
         p20_tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
         right_pip_name = "p20_multi_gen2"
