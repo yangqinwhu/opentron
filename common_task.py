@@ -175,8 +175,6 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
 #         multi_pipette_2.trash_container = trash_2
         # multi_pipette_2.drop_tips() if multi_pipette_2.has_tip else 1
 
-
-
     elif deck_plan == 'sample_to_lamp':
         # for 1st shift
         protocol = initialize(simulate =simulate,**kwarg)
@@ -248,42 +246,38 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         dest_plate_2 = protocol.load_labware(plate_name, lamp_plate_slot_2, "LAMP MM plate 2 _96 wellplate full_skirt no adaptor")
         trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
 
-
-
-
-
 def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
     """ Use pipette to perform multiple dispense
     volume: sample volume for each dispense
     disp: dispense times
     destination well by default is shift well by 1 row each time for disp times.
-    E.g. First well is A1, then next is A"""
-    def _next_row_well(w):
-        """return the well in the next row. E.g. A1 well to B1 well"""
+    """
+    def _next_well(w):
+        """n_r_w: return the well in the next row. E.g. A1 well to B1 well
+        n_c_w: return the well in the next column. E.g. A1 well to A2 well """
         p=w.parent
         w_name = w._display_name.split(' ')[0]
         row =  w_name[0]
         column = w_name[1:].strip()
         new_row = chr(ord(row) + 1)
-        n_r_w= p[new_row+column]
-        return n_r_w
+        n_r_w= p[new_row+column]  #
+
+        new_column=chr(ord(column) + 1)
+        n_c_w=p[row+new_column]
+        return n_r_w , n_c_w
 
     for i in range(0,disp):
         status="current dispensing well is {}".format(well)
         print (status)
         pipette.dispense(volume, well.bottom(disp_bottom))
-        well = _next_row_well(well)
+        well = _next_well(well)[1]
 
 def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=2,asp_bottom=2,disp_bottom=3,blowout = True,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
-        #print ("Transfering saliva samples in rack {} column {}:".format(1,2))
     #set up pipette parameter
     multi_pipette = pipette
-    # if multi_pipette.max_volume>100:
-    #     multi_pipette.flow_rate.aspirate = 120
-    #     multi_pipette.flow_rate.dispense = 120
 
     #pipette parameters
     asp_vol = (samp_vol*disp)*1.0
@@ -293,11 +287,16 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
 
     start = timeit.default_timer()
     st = timeit.default_timer() if get_time else 1
-    try:
+    # try:
+    #     multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
+    #     _log_time(st,event = 'Pick up tip') if get_time else 1
+    # except:
+    #     pass
+    if multi_pipette.has_tip:
+        pass
+    else:
         multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
         _log_time(st,event = 'Pick up tip') if get_time else 1
-    except:
-        pass
     st = timeit.default_timer() if get_time else st
 
     if buffer_vol !=0:

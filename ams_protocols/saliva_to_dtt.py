@@ -30,7 +30,7 @@ def resume_robot():
     ct.protocol.resume()
     status = "protocol resumed"
 
-def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,**kwarg):
+def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per_column=8,aspirate_rate=0,replicates=1,dispense_rate=0,repl_chg_tip=False,**kwarg):
     """
     Pipette: P300 mounted on the left
     1st set of labwares:
@@ -70,11 +70,27 @@ def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per
     print (len(dts))
     if len(sts)>len(dts):
         raise Exception("Destination plate well is less than sample well. Please double check sample and replicate number.")
-    for i, (s, d) in enumerate(zip(sts,dts)):
-        print ("Start transfering Saliva to 96 well plate")
-        run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
-        print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
 
+    rev_vol=kwarg["reverse_vol"]
+    samp_vol=kwarg["samp_vol"]
+    rev_status=0
+    total_vol=rev_vol+samp_vol
+    for i, (s, d) in enumerate(zip(sts,dts)):
+        p.trash_container = ct.trash_2 if i > 11 else ct.trash
+        # print ("Start transfering sample to lamp MM plate")
+        if repl_chg_tip == False and (i+1)%replicates!=0:
+            kwarg.update({"chgTip":0})
+        else:
+            kwarg.update({"chgTip":1})
+
+        if rev_status==0:
+            kwarg.update({"reverse_pip":1})
+            rev_status=1
+        else:
+            kwarg.update({"reverse_pip":0})
+        run_time,well,incubation_start_time = ct.p_transfer(p,s,d,**kwarg)
+        rev_status=0 if kwarg["chgTip"] else 1
+        print ("Total transfer time for {} samples is {:.2f} second".format(samples,run_time))
     ct._log_time(start, 'Total run time for {:.2f} columns'.format(sample_c))
     print ("####################### BATCH END ######################")
 

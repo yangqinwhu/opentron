@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 import tkinter as tk
@@ -157,7 +156,7 @@ aliquot_p100_96well={
 }
 
 
-BOTTON_FONT=18
+BOTTON_FONT=20
 LABEL_FONT=8
 
 class OpentronApp(tk.Tk):
@@ -220,74 +219,100 @@ class RunPage(tk.Frame):
         self.robot_url="http://192.168.1.46:8000"
         # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
-        self.essential = ["simulate","samples","start_tip","replicates"]
-        self.form_row=0
-        self.form_column=1
+        self.basic=["samples","start_tip"]
         self.para_confirmed=0
+        self.create_frames()
         self.create_widgets()
+
+    def create_frames(self):
+        self.Frame1 = tk.Frame(self)  # Frame 1 is the side button
+        self.Frame1.place(x=0,y=0,height=400,width=150)
+        self.BottomFrame = tk.Frame(self)
+        self.BottomFrame.place(x=150,y=350,height=50,width=450) # Frame 2 is the bottom button
+        self.FormFrame = tk.Frame(self) # param is the parameter region
+        self.FormFrame.place(x=150,y=0,height=350,width=450)
+        self.frm_txt = tk.Text(self)
+        self.frm_txt.place(
+            x=600,y=20,height=360,width=200)
 
     def create_widgets(self):
         ### botton control area
-        self.create_buttons()
-
+        self.create_side_buttons()
+        self.create_bottom_buttons()
         ### Input area
-        self.create_forms(self.defaultParams)
+        self.create_forms(self.defaultParams,basic=True)
 
-        ### Text output area
-        self.frm_txt = tk.Text(self)
-        self.frm_txt.place(
-            x=600,y=20,height=400,width=180)
-
-    def create_form(self,dic):
+    def _create_form(self,dic,master):
         for idx, text in enumerate(dic.keys()):
-            label = tk.Label(master=self, text=text,width=10,font=('Arial',LABEL_FONT))
-            entry = tk.Entry(master=self, textvariable=dic[text],width=10,font=('Arial',LABEL_FONT))
+            label = tk.Label(master, text=text,width=10,font=('Arial',LABEL_FONT))
+            entry = tk.Entry(master, textvariable=dic[text],width=10,font=('Arial',LABEL_FONT))
             label.grid(row=idx+self.form_row, column=self.form_column,sticky="e")
             entry.grid(row=idx+self.form_row, column=self.form_column+1,sticky="e")
         # self.form_row+=len(dic.keys())
 
-    def create_forms(self,dic):
+    def create_forms(self,dic,basic=True):
         """Parse input dic and create forms for multiple parameters"""
-        tk.Label(master=self, text="Run Config",font=('Arial',LABEL_FONT+2)).grid(
+        master=self.FormFrame
+        master.destroy()
+        self.FormFrame = tk.Frame(self)
+        self.FormFrame.place(x=150,y=0,height=350,width=450)
+        master=self.FormFrame
+        self.form_row=0
+        self.form_column=0
+        tk.Label(master, text="Run Config",font=('Arial',LABEL_FONT+2)).grid(
             row=self.form_row, column=self.form_column, columnspan=1,sticky="e")
-        entry = tk.Entry(master=self, width=40,font=('Arial',LABEL_FONT))
+        entry = tk.Entry(master, width=40,font=('Arial',LABEL_FONT))
         entry.grid(
             row=self.form_row, column=self.form_column+1,columnspan=3, sticky="w")
-        print (self.config)
         entry.insert(0,self.config)
         self.form_row+=1
+        self._create_forms(dic,master,basic=basic)
+
+    def _create_forms(self,dic,master,basic=True):
         self.run_params = {}
         for form in self.forms:
             self.run_params[form]={}
             for k,i in self.defaultParams[form].items():
-                if isinstance(i,int): var = tk.IntVar()
-                elif isinstance(i,float): var = tk.DoubleVar()
-                else: var = tk.StringVar()
-                var.set(i)
-                self.run_params[form][k]=var
-            tk.Label(master=self, text = form,font=('Arial',LABEL_FONT+2)).grid(
-                row=self.form_row, column=self.form_column,columnspan=2, sticky="ew")
-            self.form_row+=1
-            self.create_form(self.run_params[form])
-            self.form_row=1
-            self.form_column+=2
-        ROW_MAX=max([len(i) if isinstance(i, dict) else 0 for i in self.run_params.values()])
-        tk.Button(self, text ="Apply", font=('Arial',BOTTON_FONT),command=self.confirm_run_params).grid(
-            row=(ROW_MAX+2), column=1, columnspan=2,sticky="e")
-        tk.Button(self, text ="Save", font=('Arial',BOTTON_FONT),command=self.save_run_params).grid(
-            row=(ROW_MAX+2), column=3,  columnspan=2,sticky="w")
+                p = self.basic if basic else self.defaultParams[form]
+                if k in p:
+                    if isinstance(i,int): var = tk.IntVar()
+                    elif isinstance(i,float): var = tk.DoubleVar()
+                    else: var = tk.StringVar()
+                    var.set(i)
+                    self.run_params[form][k]=var
+            if len(self.run_params[form])>0:
+                tk.Label(master, text = form,font=('Arial',LABEL_FONT+2)).grid(
+                    row=self.form_row, column=self.form_column,columnspan=2, sticky="ew")
+                self.form_row+=1
+                self._create_form(self.run_params[form],master)
+                self.form_row=1
+                self.form_column+=2
 
-    def create_buttons(self):
-        tk.Button(master=self,text='Home',font=('Arial',BOTTON_FONT),command=self.init_robot).grid(
+    def create_bottom_buttons(self):
+        master=self.BottomFrame
+        tk.Button(master, text ="Apply", font=('Arial',BOTTON_FONT),command=self.confirm_run_params).grid(
+            row=0, column=1, columnspan=2,sticky="e")
+        tk.Button(master, text ="Save", font=('Arial',BOTTON_FONT),command=self.save_run_params).grid(
+            row=0, column=3,  columnspan=2,sticky="w")
+        self.adv_btn=tk.Button(master, text =">> Adv", font=('Arial',BOTTON_FONT),command=self.get_all_forms)
+        self.adv_btn.grid(row=0, column=5,  columnspan=1,sticky="w")
+        self.basic_btn=tk.Button(master, text ="  <<", font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.get_basic_forms)
+        self.basic_btn.grid(row=0, column=0,  columnspan=1,sticky="w")
+
+    def create_side_buttons(self):
+        master = self.Frame1
+        tk.Button(master,text='Home',font=('Arial',BOTTON_FONT),command=self.init_robot).grid(
             row=0, column=0, rowspan=2,sticky="we")
-        tk.Button(master=self,text='Run',font=('Arial',BOTTON_FONT),command=self.run_robot).grid(
-            row=2, column=0, rowspan=2,sticky="we")
-        tk.Button(master=self,text='Pause',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.pause_robot).grid(
-            row=4, column=0, rowspan=2,sticky="we")
-        tk.Button(master=self,text='Resume',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.resume_robot).grid(
+        tk.Button(master,text='Run',font=('Arial',BOTTON_FONT),command=self.run_robot).grid(
+            row=3, column=0, rowspan=2,sticky="we")
+        tk.Button(master,text='Pause',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.pause_robot).grid(
             row=6, column=0, rowspan=2,sticky="we")
-        tk.Button(master=self,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome).grid(
-            row=8, column=0,rowspan=2, sticky="we")
+        tk.Button(master,text='Resume',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.resume_robot).grid(
+            row=9, column=0, rowspan=2,sticky="we")
+        tk.Button(master,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome).grid(
+            row=12, column=0,rowspan=2, sticky="we")
+        for i in range(5):
+            tk.Label(master, text="",font=('Arial',LABEL_FONT)).grid(row=(i*3+2), column=0,sticky="e")
 
     def showPage(self):
         self.tkraise()
@@ -328,19 +353,6 @@ class RunPage(tk.Frame):
         url=self.robot_url+'/resume'
         res=requests.get(url,json=self.get_run_params())
 
-    def get_run_params_1(self):
-        #to be deleted after running the robot
-        para = self.defaultParams
-        for f in self.forms:
-            para.pop(f)
-            para[f]={}
-            for k,i in self.run_params[f].items():
-                try:
-                    para[f][k]=i.get()
-                except:
-                    para[f][k] = self.defaultParams[f][k]
-        return para
-
     def get_run_params(self):
         para = {}
         for f in self.defaultParams.keys():
@@ -368,6 +380,17 @@ class RunPage(tk.Frame):
         with open(pp, 'wt') as f:
             json.dump(para, f, indent=2)
         f.close()
+
+    def get_all_forms(self):
+        self.create_forms(self.defaultParams,basic=False)
+        self.basic_btn.config(state=tk.NORMAL)
+        self.adv_btn.config(state=tk.DISABLED)
+
+    def get_basic_forms(self):
+        self.create_forms(self.defaultParams,basic=True)
+        self.basic_btn.config(state=tk.DISABLED)
+        self.adv_btn.config(state=tk.NORMAL)
+
 
 class DTTPage(RunPage):
     config="saliva_to_dtt"
@@ -404,6 +427,11 @@ class AliquotLAMPPage(RunPage):
     else:
         defaultParams=aliquot_p100_96well
     pass
+
+
+
+
+
 
 
 app = OpentronApp()
