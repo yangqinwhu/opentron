@@ -66,7 +66,7 @@ sample_to_lamp_96well={
     "transfer_param":{
         "samp_vol":5,
         "reverse_vol":0,
-        "rp4"=0
+        "rp4"=0,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
