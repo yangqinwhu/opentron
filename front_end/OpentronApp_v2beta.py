@@ -391,7 +391,6 @@ class RunPage(tk.Frame):
         self.basic_btn.config(state=tk.DISABLED)
         self.adv_btn.config(state=tk.NORMAL)
 
-
 class DTTPage(RunPage):
     config="saliva_to_dtt"
     pp=f".{config}.configure"
@@ -411,7 +410,7 @@ class LAMPPage(RunPage):
     pass
 
 class AliquotDTTPage(RunPage):
-    config="aliquot_p100_96well"
+    config="aliquot_dtt_p100"
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
@@ -420,7 +419,7 @@ class AliquotDTTPage(RunPage):
     pass
 
 class AliquotLAMPPage(RunPage):
-    config="aliquot_p100_96well"
+    config="aliquot_LAMP_p100"
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))

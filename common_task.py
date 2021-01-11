@@ -149,7 +149,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
         dest_plate = protocol.load_labware(plate_name, plate_slot, "DTT plate batch 1 _96 well full skirt no adaptor" )
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=tips)
-        multi_pipette.trash_container = trash
+        # multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
         #for 2nd shift
@@ -171,9 +171,8 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
         dest_plate_2 = protocol.load_labware(plate_name, plate_slot,"DTT plate batch 2 _96 well full skirt no adaptor")
         multi_pipette_2 = multi_pipette
-#         multi_pipette_2.tip_racks = tips_2
-#         multi_pipette_2.trash_container = trash_2
-        # multi_pipette_2.drop_tips() if multi_pipette_2.has_tip else 1
+
+
 
     elif deck_plan == 'sample_to_lamp':
         # for 1st shift
@@ -229,7 +228,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         dest_plate = protocol.load_labware(plate_name, lamp_plate_slot,"LAMP MM plate 1 _96 wellplate full_skirt no adaptor")
         multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=tips)
         trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
-        multi_pipette.trash_container = trash
+        # multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
         p20_tip_slots_2 = ["8"]
@@ -245,6 +244,31 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         # src_tubes_2 = src_plate_2.rows()[0]
         dest_plate_2 = protocol.load_labware(plate_name, lamp_plate_slot_2, "LAMP MM plate 2 _96 wellplate full_skirt no adaptor")
         trash_2 = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot_2)
+
+    elif deck_plan == 'sample_to_lamp_96well_n7_rp4':
+        # for 1st shift
+        protocol = initialize(simulate =simulate,**kwarg)
+        p20_tip_name = "opentrons_96_filtertiprack_20ul"
+        p20_tip_slots = ["10"]
+        right_pip_name = "p20_multi_gen2"
+        plate_name = "nest_96_wellplate_100ul_pcr_full_skirt"
+        sample_plate_slot ="5"
+        lamp_plate_slot="2"
+
+        tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
+        src_plate = protocol.load_labware(plate_name, sample_plate_slot,"Saliva plate _96 wellplate full_skirt no adaptor")
+        src_tubes = src_plate.rows()[0]
+        dest_plate = protocol.load_labware(plate_name, lamp_plate_slot,"LAMP MM plate 1 _96 wellplate full_skirt no adaptor")
+        multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=tips)
+        # multi_pipette.trash_container = trash
+        # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
+
+        p20_tip_slots_2 = ["11"]
+        # sample_plate_slot_2 ="11"
+        lamp_plate_slot_2="8"
+        # src_plate_2 = protocol.load_labware_from_definition(plate_name, sample_plate_slot_2)
+        # src_tubes_2 = src_plate_2.rows()[0]
+        dest_plate_2 = protocol.load_labware(plate_name, lamp_plate_slot_2, "LAMP MM plate 2 _96 wellplate full_skirt no adaptor")
 
 def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
     """ Use pipette to perform multiple dispense
@@ -287,16 +311,16 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
 
     start = timeit.default_timer()
     st = timeit.default_timer() if get_time else 1
-    # try:
-    #     multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
-    #     _log_time(st,event = 'Pick up tip') if get_time else 1
-    # except:
-    #     pass
-    if multi_pipette.has_tip:
-        pass
-    else:
+    try:
         multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
         _log_time(st,event = 'Pick up tip') if get_time else 1
+    except:
+        pass
+    # if multi_pipette.has_tip:
+    #     pass
+    # else:
+    #     multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
+    #     _log_time(st,event = 'Pick up tip') if get_time else 1
     st = timeit.default_timer() if get_time else st
 
     if buffer_vol !=0:
@@ -357,3 +381,23 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
 #     time.sleep(heat_time*60)
 #     tm_deck.set_temperature(25)
 #     tm_deck.deactivate()
+
+# def build_custom_deck(tip_name = "opentrons_96_filtertiprack_200ul",
+#     tip_slots = ["5","1"],pip_name = "p300_multi",pip_location="left",
+#     trash_slot="None",
+#     src_name="None",src_slots = ["6"],
+#     dest_name = 'nest_96_wellplate_100ul_pcr_full_skirt',
+#     dest_slot ="3"):
+#
+#
+#     liquid_trash_rack=json.loads(lw.amsliquidtrash)
+#     src_name = json.loads(lw.micronic_96_wellplate_1400ul)
+#
+#     tips = [protocol.load_labware(tip_name, slot) for slot in tip_slots]
+#     src_racks = [protocol.load_labware_from_definition(src_name,slot) for slot in src_slots]
+#     src_tubes=[]
+#     for i in range(0,len(rack_slots)):
+#         src_tubes += src_racks[i].rows()[0]
+#     trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
+#     dest_plate = protocol.load_labware(plate_name, dest_slot, "DTT plate batch 1 _96 well full skirt no adaptor" )
+#     multi_pipette = protocol.load_instrument(pip_name, pip_location, tip_racks=tips)
