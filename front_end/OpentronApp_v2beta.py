@@ -49,7 +49,7 @@ sample_to_lamp_96well={
     },
     "robot_param":{
         "simulate":True,
-        "deck":"sample_to_lamp_96well",
+        "deck":"sample_to_lamp_96well_n7_rp4",
     },
     "sample_info":{
         "samples":8,
@@ -65,10 +65,11 @@ sample_to_lamp_96well={
     "transfer_param":{
         "samp_vol":5,
         "reverse_vol":0,
+        "rp4"=0
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
-        "disp_bottom":0,
+        "disp_bottom":-2,
         'mix':0,
         "get_time":1,
         'returnTip':False,
@@ -107,7 +108,7 @@ aliquot_p20_96well={
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
-        "disp_bottom":0,
+        "disp_bottom":-2,
         'mix':0,
         "get_time":1,
         'returnTip':False,
@@ -143,8 +144,8 @@ aliquot_p100_96well={
         "reverse_vol":10,
         "air_vol": 0,
         "disp":6,
-        "asp_bottom":-4,
-        "disp_bottom":-3,
+        "asp_bottom":-2,
+        "disp_bottom":-10,
         'mix':0,
         "get_time":1,
         'returnTip':False,
@@ -154,6 +155,7 @@ aliquot_p100_96well={
         "tip_presses" : 1,
     },
 }
+
 
 
 BOTTON_FONT=20
