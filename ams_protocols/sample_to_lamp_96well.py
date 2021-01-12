@@ -50,7 +50,7 @@ def run_batch(start_tip=1,start_tube=1,start_dest=1,batch=1,samples=8,sample_per
     p.tip_racks = ct.tips+ct.tips_2
     p.reset_tipracks()
     p.starting_tip=ct.tips[0].rows()[0][start_tip-1]
-    # p.trash_container = ct.trash
+    p.trash_container = ct.trash
 
     # p.flow_rate.aspirate = aspirate_rate
     # p.flow_rate.dispense = dispense_rate

@@ -63,7 +63,7 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
         dest_plate = protocol.load_labware(plate_name, plate_slot)
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=tips)
-        multi_pipette.trash_container = trash
+#         multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
         #for 2nd shift
@@ -255,15 +255,20 @@ def load_deck(deck_plan='saliva_to_dtt',simulate =False,**kwarg):
         sample_plate_slot ="5"
         lamp_plate_slot="2"
 
+
+        trash_slot="6"
+        liquid_trash_rack=json.loads(lw.amsliquidtrash)
+        trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
         tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
         src_plate = protocol.load_labware(plate_name, sample_plate_slot,"Saliva plate _96 wellplate full_skirt no adaptor")
         src_tubes = src_plate.rows()[0]
         dest_plate = protocol.load_labware(plate_name, lamp_plate_slot,"LAMP MM plate 1 _96 wellplate full_skirt no adaptor")
         multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=tips)
-        # multi_pipette.trash_container = trash
+        multi_pipette.trash_container = trash
         # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
 
         p20_tip_slots_2 = ["11"]
+        tips_2=tips
         # sample_plate_slot_2 ="11"
         lamp_plate_slot_2="8"
         # src_plate_2 = protocol.load_labware_from_definition(plate_name, sample_plate_slot_2)
@@ -283,10 +288,10 @@ def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
         w_name = w._display_name.split(' ')[0]
         row =  w_name[0]
         column = w_name[1:].strip()
-        new_row = chr(ord(row) + 1)
+        new_row = chr(ord(row) + 1) if ord(row)<ord("H") else chr(ord(row))
         n_r_w= p[new_row+column]  #
 
-        new_column=chr(ord(column) + 1)
+        new_column=str(int(column) + 1) if int(column)<12 else str(int(column))
         n_c_w=p[row+new_column]
         return n_r_w , n_c_w
 
@@ -296,7 +301,7 @@ def p_dispense(pipette,well,volume,disp=1,disp_bottom=3):
         pipette.dispense(volume, well.bottom(disp_bottom))
         well = _next_well(well)[1]
 
-def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=2,asp_bottom=2,disp_bottom=3,blowout = True,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0):
+def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=2,asp_bottom=2,disp_bottom=3,blowout = False,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0):
     """ s: source well  d: destination well b: buffer well.
     dispense: how many times the same to be dispensed
     Transfer from source well: s to destination well"""
@@ -311,16 +316,16 @@ def p_transfer(pipette,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 
 
     start = timeit.default_timer()
     st = timeit.default_timer() if get_time else 1
-    try:
+#     try:
+#         multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
+#         _log_time(st,event = 'Pick up tip') if get_time else 1
+#     except:
+#         pass
+    if multi_pipette.has_tip:
+        pass
+    else:
         multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
         _log_time(st,event = 'Pick up tip') if get_time else 1
-    except:
-        pass
-    # if multi_pipette.has_tip:
-    #     pass
-    # else:
-    #     multi_pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
-    #     _log_time(st,event = 'Pick up tip') if get_time else 1
     st = timeit.default_timer() if get_time else st
 
     if buffer_vol !=0:

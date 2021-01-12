@@ -131,3 +131,53 @@ def test_run():
     run(**sample_info,**transfer_param)
 
 # test_run()
+
+def _conca_param(**kwarg):
+    param={}
+    for k,i in kwarg.items():
+        param={**param,**i}
+    return param
+
+
+run_param={
+    "robot_param":{
+        "simulate":True,
+        "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
+    },
+    "sample_info":{
+        "target_c":10,
+        "samples":8,
+        "sample_per_column":8,
+        "total_batch":1,
+        "start_batch":1,
+        "start_tube":1,
+        "start_dest":1,
+        "start_tip":1,
+        "replicates":2,
+    },
+    "transfer_param":{
+        "samp_vol":10,
+        "reverse_vol":10,
+        "air_vol": 0,
+        "disp":6,
+        "asp_bottom":-2,
+        "disp_bottom":-10,
+        'mix':0,
+        "get_time":1,
+        'returnTip':False,
+        "aspirate_rate": 120,
+        "dispense_rate": 20,
+        "tip_press_increment":0.3,
+        "tip_presses" : 1,
+    },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
+        "tip_slots":["7","8"],
+        "pip_name":"p300_multi",
+        "pip_location":"left",
+        "trash_slot":"9",
+        "src_name":"None",
+        "src_slots": ["2"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["5"]
+    }
+}

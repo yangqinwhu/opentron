@@ -120,7 +120,7 @@ aliquot_p20_96well={
 }
 
 aliquot_p100_96well={
-    "protocol":"saliva_to_dtt",
+    "protocol":"p200_aliquot",
     "robot_status":{
         "initialized":0,
         "to_run":1,
@@ -130,6 +130,7 @@ aliquot_p100_96well={
         "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
+        "target_c":10,
         "samples":8,
         "sample_per_column":8,
         "total_batch":1,
@@ -154,8 +155,17 @@ aliquot_p100_96well={
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
+        "tip_slots":["7","8"],
+        "pip_name":"p300_multi",
+        "pip_location":"left",
+        "trash_slot":"9",
+        "src_name":"None",
+        "src_slots": ["2"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["5"]
+    }
 }
-
 
 
 BOTTON_FONT=20
@@ -218,8 +228,8 @@ class RunPage(tk.Frame):
         super().__init__(parent)
         self.master = master
         self.parent=parent
-        self.robot_url="http://192.168.1.46:8000"
-        # self.robot_url="http://127.0.0.1:8000"
+        # self.robot_url="http://192.168.1.46:8000"
+        self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
         self.basic=["samples","start_tip"]
         self.para_confirmed=0

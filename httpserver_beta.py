@@ -5,7 +5,7 @@ from threading import Thread
 import sys,json,time
 import ams_protocols.saliva_to_dtt as saliva_to_dtt
 import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
-# import ams_protocols.p200_aliquot_beta as p200_aliquot
+import ams_protocols.p200_aliquot_beta as p200_aliquot
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 # server_ip = "192.168.1.46"
@@ -158,16 +158,16 @@ class RunRobot:
         elif jsondata["protocol"]=="sample_to_lamp_96well":
             # self.sele('sample_to_lamp_96well')
             self.prot=sample_to_lamp_96well
-        # elif jsondata["protocol"]=="p200_aliquot":
-        #     # self.sele('sample_to_lamp_96well')
-        #     self.prot=p200_aliquot
+        elif jsondata["protocol"]=="p200_aliquot":
+            # self.sele('sample_to_lamp_96well')
+            self.prot=p200_aliquot
         if not jsondata["robot_status"]["initialized"]:
-            self.deck_plan=self.prot.initialize_robot(**jsondata["robot_param"])
+            self.prot.initialize_robot(**jsondata)
             print ("opentron initialized")
             self.status = "Robot Initialized"
     def run(self,jsondata):
         if jsondata["robot_status"]["to_run"]:
-            self.prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
+            self.prot.run(**jsondata)
             self.status = "Run finished"
     def pause(self):
         self.prot.pause_robot()
