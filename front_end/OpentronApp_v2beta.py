@@ -5,13 +5,16 @@ import tkinter as tk
 import json,requests
 
 saliva_to_dtt={
-    "protocol":"saliva_to_dtt",
+    "protocol":{
+    "file":"saliva_to_dtt",
+    "run":"p200_aliqot"
+    },
     "robot_status":{
         "initialized":0,
         "to_run":1,
     },
     "robot_param":{
-        "simulate":True,
+        "simulate":False,
         "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
@@ -42,7 +45,10 @@ saliva_to_dtt={
 }
 
 sample_to_lamp_96well={
-    "protocol":"sample_to_lamp_96well",
+    "protocol":{
+    "file":"sample_to_lamp_96well",
+    "run":"p200_aliqot"
+    },
     "robot_status":{
         "initialized":0,
         "to_run":1,
@@ -81,7 +87,10 @@ sample_to_lamp_96well={
 }
 
 aliquot_p20_96well={
-    "protocol":"sample_to_lamp_96well",
+    "protocol":{
+    "file":"sample_to_lamp_96well",
+    "run":"p200_aliqot"
+    },
     "robot_status":{
         "initialized":0,
         "to_run":1,
@@ -120,7 +129,9 @@ aliquot_p20_96well={
 }
 
 aliquot_p100_96well={
-    "protocol":"p200_aliquot",
+    "protocol":{
+    "file":"p200_aliquot",
+    },
     "robot_status":{
         "initialized":0,
         "to_run":1,
@@ -130,7 +141,8 @@ aliquot_p100_96well={
         "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
-        "target_c":10,
+        "target_c":2,
+        "target_p":1,
         "samples":8,
         "sample_per_column":8,
         "total_batch":1,
@@ -161,9 +173,9 @@ aliquot_p100_96well={
         "pip_location":"left",
         "trash_slot":"9",
         "src_name":"None",
-        "src_slots": ["2"],
+        "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["5"]
+        "dest_slots":["2","3","4","5","6"],
     }
 }
 
@@ -205,9 +217,9 @@ class HomePage(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),command=lambda:self.master.showPage('DTTPage')).place(
+        tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('DTTPage')).place(
             x=20,y=40,height=150,width=360)
-        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
+        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('LAMPPage')).place(
             x=420,y=40,height=150,width=360)
         tk.Button(self,text='Aliquot DTT \n P100',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
             x=20,y=210,height=150,width=360)
@@ -224,17 +236,18 @@ class RunPage(tk.Frame):
     """Parameters in the essential will be displayed seperately.
     Other parameters will only display in the developer page"""
 
+    basic=["start_tip","start_tube"]
     def __init__(self,parent,master):
         super().__init__(parent)
         self.master = master
         self.parent=parent
-        # self.robot_url="http://192.168.1.46:8000"
-        self.robot_url="http://127.0.0.1:8000"
+        self.robot_url="http://192.168.1.46:8000"
+        # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
-        self.basic=["samples","start_tip"]
-        self.para_confirmed=0
+        self.initialized=0
         self.create_frames()
         self.create_widgets()
+        self.config_side_buttons()
 
     def create_frames(self):
         self.Frame1 = tk.Frame(self)  # Frame 1 is the side button
@@ -302,8 +315,8 @@ class RunPage(tk.Frame):
 
     def create_bottom_buttons(self):
         master=self.BottomFrame
-        tk.Button(master, text ="Apply", font=('Arial',BOTTON_FONT),command=self.confirm_run_params).grid(
-            row=0, column=1, columnspan=2,sticky="e")
+        # tk.Button(master, text ="Apply", font=('Arial',BOTTON_FONT),command=self.confirm_run_params).grid(
+        #     row=0, column=1, columnspan=2,sticky="e")
         tk.Button(master, text ="Save", font=('Arial',BOTTON_FONT),command=self.save_run_params).grid(
             row=0, column=3,  columnspan=2,sticky="w")
         self.adv_btn=tk.Button(master, text =">> Adv", font=('Arial',BOTTON_FONT),command=self.get_all_forms)
@@ -313,18 +326,33 @@ class RunPage(tk.Frame):
 
     def create_side_buttons(self):
         master = self.Frame1
-        tk.Button(master,text='Home',font=('Arial',BOTTON_FONT),command=self.init_robot).grid(
-            row=0, column=0, rowspan=2,sticky="we")
-        tk.Button(master,text='Run',font=('Arial',BOTTON_FONT),command=self.run_robot).grid(
+        self.qrun_btn=tk.Button(master,text='Quick Run',font=('Arial',BOTTON_FONT),command=self.quick_run)
+        self.qrun_btn.grid(
+            row=0, column=0,rowspan=2, sticky="we")
+        self.home_btn=tk.Button(master,text='Home',font=('Arial',BOTTON_FONT),command=self.init_robot)
+        self.home_btn.grid(
             row=3, column=0, rowspan=2,sticky="we")
-        tk.Button(master,text='Pause',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.pause_robot).grid(
+        self.run_btn=tk.Button(master,text='Run',font=('Arial',BOTTON_FONT),command=self.run_robot)
+        self.run_btn.grid(
             row=6, column=0, rowspan=2,sticky="we")
-        tk.Button(master,text='Resume',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.resume_robot).grid(
+        self.pause_btn=tk.Button(master,text='Pause',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.pause_robot)
+        self.pause_btn.grid(
             row=9, column=0, rowspan=2,sticky="we")
-        tk.Button(master,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome).grid(
-            row=12, column=0,rowspan=2, sticky="we")
-        for i in range(5):
+        self.resume_btn=tk.Button(master,text='Resume',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.resume_robot)
+        self.resume_btn.grid(
+            row=12, column=0, rowspan=2,sticky="we")
+        self.back_btn=tk.Button(master,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome)
+        self.back_btn.grid(
+            row=15, column=0,rowspan=2, sticky="we")
+
+        for i in range(7):
             tk.Label(master, text="",font=('Arial',LABEL_FONT)).grid(row=(i*3+2), column=0,sticky="e")
+
+    def config_side_buttons(self):
+        if self.initialized:
+            self.run_btn.config(state=tk.NORMAL)
+        else:
+            self.run_btn.config(state=tk.DISABLED)
 
     def showPage(self):
         self.tkraise()
@@ -332,30 +360,35 @@ class RunPage(tk.Frame):
 
     def goToHome(self):
         self.master.showPage('HomePage')
+        self.initialized=0
+        self.config_side_buttons()
 
-    def run_robot(self):
-        if self.para_confirmed:
-            url=self.robot_url+'/run_robot'
-            js=json.dumps(self.get_run_params())
-            res=requests.get(url,json=self.get_run_params())
-            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
-            self.frm_txt.insert(tk.END,res.text)
-            self.frm_txt.see(tk.END)
-        else:
-            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
-            self.frm_txt.insert(tk.END,"Please confirm the run parameters first by pressing Apply botton")
-            self.frm_txt.see(tk.END)
+
 
     def init_robot(self):
-        if self.para_confirmed:
-            url=self.robot_url+'/init_robot'
-            js=json.dumps(self.get_run_params())
+        url=self.robot_url+'/init_robot'
+        res=requests.get(url,json=self.get_run_params())
+        self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+        self.frm_txt.insert(tk.END,res.text)
+        self.initialized=1
+        self.config_side_buttons()
+
+    def run_robot(self):
+        if self.initialized:
+            url=self.robot_url+'/run_robot'
+            # js=json.dumps(self.get_run_params())
             res=requests.get(url,json=self.get_run_params())
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
             self.frm_txt.insert(tk.END,res.text)
+            self.frm_txt.see(tk.END)
         else:
             self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
-            self.frm_txt.insert(tk.END,"Please confirm the run parameters first by pressing Apply botton")
+            self.frm_txt.insert(tk.END,"Initialize the robot first")
+            self.frm_txt.see(tk.END)
+
+    def quick_run(self):
+        self.init_robot()
+        self.run_robot()
 
     def pause_robot(self):
         url=self.robot_url+'/pause'
@@ -409,7 +442,8 @@ class DTTPage(RunPage):
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
-        defaultParams=saliva_to_dtt
+        defaultParams=json.loads(json.dumps(saliva_to_dtt))
+    defaultParams["protocol"]["run"]=config.split("_")[0]
     pass
 
 class LAMPPage(RunPage):
@@ -418,29 +452,30 @@ class LAMPPage(RunPage):
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
-        defaultParams=sample_to_lamp_96well
+        defaultParams=json.loads(json.dumps(sample_to_lamp_96well))
+    defaultParams["protocol"]["run"]=config.split("_")[0]
     pass
 
 class AliquotDTTPage(RunPage):
-    config="aliquot_dtt_p100"
+    config="aliquotDTT_p100"
     pp=f".{config}.configure"
+    basic=["target_c","target_p","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
-        defaultParams=aliquot_p100_96well
-    pass
+        defaultParams=json.loads(json.dumps(aliquot_p100_96well))
+    defaultParams["protocol"]["run"]=config.split("_")[0]
+
 
 class AliquotLAMPPage(RunPage):
-    config="aliquot_LAMP_p100"
+    config="aliquotLamp_p100"
+    basic=["target_c","target_p","start_tip","start_tube"]
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
-        defaultParams=aliquot_p100_96well
-    pass
-
-
-
+        defaultParams=json.loads(json.dumps(aliquot_p100_96well))
+    defaultParams["protocol"]["run"]=config.split("_")[0]
 
 
 

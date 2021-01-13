@@ -152,15 +152,17 @@ class RunRobot:
     def sele(self,name):
         self.prot = name
     def initialize(self,jsondata):
-        if jsondata["protocol"]=="saliva_to_dtt":
+        if jsondata["protocol"]["file"]=="saliva_to_dtt":
             self.prot=saliva_to_dtt
             # self.sele('saliva_to_dtt')
-        elif jsondata["protocol"]=="sample_to_lamp_96well":
+        elif jsondata["protocol"]["file"]=="sample_to_lamp_96well":
             # self.sele('sample_to_lamp_96well')
             self.prot=sample_to_lamp_96well
-        elif jsondata["protocol"]=="p200_aliquot":
+        elif jsondata["protocol"]["file"]=="p200_aliquot":
             # self.sele('sample_to_lamp_96well')
             self.prot=p200_aliquot
+            print ("debug")
+            print (jsondata["protocol"]["run"])
         if not jsondata["robot_status"]["initialized"]:
             self.prot.initialize_robot(**jsondata)
             print ("opentron initialized")

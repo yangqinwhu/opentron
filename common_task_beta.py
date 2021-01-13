@@ -1,15 +1,25 @@
 from opentrons import protocol_api
-import sys,json,timeit,time
+import sys,json,timeit,time,math
 # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
 import importlib
 sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
+def _number_to_list(n,p):
+    t=math.ceil(n/p)
+    l=[]
+    for i in range(t):
+        if i ==t-1:
+            l.append(n-p*(t-1))
+        else:
+            l.append(p)
+    return l
+
 
 class RobotClass:
     def __init__(self,simulate =True,**kwarg):
         self.status=RunLog()
-        self.load_deck(simulate =True,**kwarg)
+        self.load_deck(simulate =simulate,**kwarg)
 
     def robot_initialize(self,simulate =False,**kwarg):
         """
@@ -78,6 +88,7 @@ class RobotClass:
         if self.trash_slot!="None":
             liquid_trash_rack=json.loads(self.lw.amsliquidtrash)
             self.trash = self.protocol.load_labware_from_definition(liquid_trash_rack,self.trash_slot)
+            self.multi_pipette.pipette.trash_container=self.trash
 
 class PipetteClass:
     def __init__(self,pipette,status):
@@ -145,7 +156,7 @@ class PipetteClass:
         # if self.pipette.has_tip:
         #     pass
         # else:
-        #     self.pipettepick_up_tip(presses=tip_presses, increment=tip_press_increment)
+        #     self.pipette.pick_up_tip(presses=tip_presses, increment=tip_press_increment)
             self._log_time(st,event = 'Pick up tip') if get_time else 1
         st = timeit.default_timer() if get_time else st
 
@@ -188,9 +199,9 @@ class PipetteClass:
             else:
                 self.pipette.drop_tip(home_after=False)
                 self.pipette.home()
+                print ("Tip changed")
                 self._log_time(st,event = 'Drop tip') if get_time else 1
                 st = timeit.default_timer() if get_time else st
-
 
 class RunLog:
     def __init__(self):
@@ -204,49 +215,86 @@ class RunRobot(RobotClass):
     def __init__(self,**kwarg):
         self.robot=RobotClass(**kwarg)
         self.mp=self.robot.multi_pipette
-        self.protocol_init(**kwarg)
+        self.init_protocol(**kwarg)
 
-    def protocol_init(self,start_tip=1,start_tube=1,start_dest=1,**kwarg):
-        self.current_tip=start_tip-1
+    def init_protocol(self,**kwarg):
+        self.init_plate(**kwarg)
+        self.init_well(**kwarg)
+        self.init_pipette(**kwarg)
+
+    def init_plate(self,src_plate=1,dest_plate=1,**kwarg):
+        self.current_srcplate=src_plate-1
+        self.next_srcplate=self.current_srcplate+1
+        self.current_destplate=dest_plate-1
+        self.next_destplate=self.current_destplate+1
+
+    def init_well(self,start_tube=1,start_dest=1,**kwarg):
         self.current_srctube=start_tube-1
         self.current_desttube=start_dest-1
+
+    def init_pipette(self,start_tip=1,**kwarg):
+        self.current_tip=start_tip-1
         self.mp.pipette.reset_tipracks()
         self.mp.pipette.starting_tip=self.robot.tips[0].rows()[0][start_tip-1]
 
-    def _set_aliquot(self,disp=1,**kwarg):
-        self.sts=self.robot.src_tubes[self.current_srctube:self.current_srctube+1]
-        self.dts=self.robot.dest_tubes[self.current_desttube:self.current_desttube+1]
+
+    def _set_aliquot(self,**kwarg):
+        self.sts=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube:self.current_srctube+1]
+        self.dts=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube:self.current_desttube+1]
 
     def _update_aliquot(self,disp=1,**kwarg):
         self.next_srctube=self.current_srctube+1
         self.next_desttube=self.current_desttube+disp
 
     def _set_replicate(self,replicates=1,**kwarg):
-        self.sts=self.robot.src_tubes[self.current_srctube:self.current_srctube+1]
-        self.dts=self.robot.dest_tubes[self.current_desttube:(self.current_desttube+replicates)]
+        self.sts=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube:self.current_srctube+1]
+        self.dts=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube:self.current_desttube+replicates]
 
     def _update_replicate(self,replicates=1,**kwarg):
         self.next_srctube=self.current_srctube+1
         self.next_desttube=self.current_desttube+replicates
 
-    def _update_srctube(self):
-        self.current_srctube=self.next_srctube
-        self.next_srctube+=1
+    def _update_one(self,c,n):
+        return n,n+1
 
-    def _update_desttube(self):
-        self.current_desttube=self.next_desttube
-        self.next_desttube+=1
-
-    def aliquot_dtt_p100(self,target_c=12,**kwarg):
-        disps= [6,target_c-6] if target_c>6 else [target_c]
+    def _aliquot(self,target_c=1,**kwarg):
+        disps=_number_to_list(target_c,kwarg["disp"])
         kwarg.update({"reverse_pip":1})
+        h=0
         for disp in disps:
+            h+=1
             kwarg.pop("disp")
             self._set_aliquot(disp=disp)
             kwarg.update({"chgTip":0})
             kwarg.update({"disp":disp})
             for i, (s, d) in enumerate(zip(self.sts,self.dts)):
+                if i==(len(self.dts)-1) and h==(len(disps)):
+                    kwarg.update({"chgTip":1})
                 self.mp.p_transfer(s,d,**kwarg)
                 kwarg.update({"reverse_pip":0})
             self._update_aliquot(disp=disp)
-            self._update_desttube()
+            self.current_desttube,self.next_desttube=self._update_one(self.current_desttube,self.next_desttube)
+
+    def _aliquot_lamp_one_plate(self,**kwarg):
+        self._aliquot(**kwarg)
+        self.current_desttube=11
+        s=self.robot.src_plates[self.current_srcplate].rows()[0][11]
+        d=self.robot.dest_tubes[self.current_desttube]
+        kwarg.update({"disp":1})
+        kwarg.update({"chgTip":1})
+        self.mp.p_transfer(s,d,**kwarg)
+
+    def aliquot_dtt_p100(self,target_p=1,**kwarg):
+        for p in range(0,target_p):
+            self._aliquot(**kwarg)
+            self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
+            self.init_well(**kwarg)
+
+    def aliquot_lamp_p100(self,target_p=1,**kwarg):
+        for p in range(0,target_p):
+            self._aliquot_lamp_one_plate(**kwarg)
+            self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
+            self.init_well(**kwarg)
+
+    def _sample_to_lamp(self,**kwarg):
+        pass
