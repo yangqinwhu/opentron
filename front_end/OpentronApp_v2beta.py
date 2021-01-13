@@ -89,7 +89,7 @@ sample_to_lamp_96well={
 aliquot_p20_96well={
     "protocol":{
     "file":"sample_to_lamp_96well",
-    "run":"p200_aliqot"
+    "run":"p20_aliqot"
     },
     "robot_status":{
         "initialized":0,
@@ -131,6 +131,7 @@ aliquot_p20_96well={
 aliquot_p100_96well={
     "protocol":{
     "file":"p200_aliquot",
+    "run":"p200_aliqot"
     },
     "robot_status":{
         "initialized":0,
