@@ -29,11 +29,12 @@ def initialize_robot(**kwarg):
     r=ct.RunRobot(**_conca_param(**kwarg))
 
 def aliquot_dtt(**kwarg):
-    """This function is to run this file locally with all the parameters"""
+    print (f'******************** {kwarg["protocol"]["run"]} ****************')
+    r.init_protocol(**_conca_param(**kwarg))
     r.aliquot_dtt_p100(**_conca_param(**kwarg))
 
 def aliquot_lamp(**kwarg):
-    """This function is to run this file locally with all the parameters"""
+    print (f'******************** {kwarg["protocol"]["run"]} ****************')
     r.init_protocol(**_conca_param(**kwarg))
     r.aliquot_lamp_p100(**_conca_param(**kwarg))
 

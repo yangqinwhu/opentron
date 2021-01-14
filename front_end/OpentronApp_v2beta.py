@@ -2,7 +2,14 @@ import os
 from pathlib import Path
 import tkinter as tk
 # import shutil
-import json,requests
+import json,requests,copy
+
+BOTTON_FONT=20
+LABEL_FONT=8
+#server_ip = "127.0.0.1"
+server_ip = "192.168.1.46"
+
+PORT = 8000
 
 saliva_to_dtt={
     "protocol":{
@@ -144,8 +151,7 @@ aliquot_p100_96well={
     "sample_info":{
         "target_c":2,
         "target_p":1,
-        "samples":8,
-        "sample_per_column":8,
+        "src_vol":150,
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
@@ -160,8 +166,8 @@ aliquot_p100_96well={
         "reverse_vol":10,
         "air_vol": 0,
         "disp":6,
-        "asp_bottom":-2,
-        "disp_bottom":-10,
+        "asp_bottom":-3,
+        "disp_bottom":-11,
         'mix':0,
         "get_time":1,
         'returnTip':False,
@@ -183,8 +189,7 @@ aliquot_p100_96well={
 }
 
 
-BOTTON_FONT=20
-LABEL_FONT=8
+
 
 class OpentronApp(tk.Tk):
     def __init__(self):
@@ -244,7 +249,7 @@ class RunPage(tk.Frame):
         super().__init__(parent)
         self.master = master
         self.parent=parent
-        self.robot_url="http://192.168.1.46:8000"
+        self.robot_url=f"http://{server_ip}:{PORT}"
         # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
         self.initialized=0
@@ -424,6 +429,7 @@ class RunPage(tk.Frame):
 
     def save_run_params(self):
         para=self.get_run_params()
+        self.defaultParams=copy.deepcopy(para)
         pp=f".{self.config}.configure"
         with open(pp, 'wt') as f:
             json.dump(para, f, indent=2)
@@ -462,7 +468,7 @@ class LAMPPage(RunPage):
 class AliquotDTTPage(RunPage):
     config="aliquotDTT_p100"
     pp=f".{config}.configure"
-    basic=["target_c","target_p","start_tip","start_tube"]
+    basic=["target_c","target_p","start_tip","start_tube","src_vol"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -472,7 +478,7 @@ class AliquotDTTPage(RunPage):
 
 class AliquotLAMPPage(RunPage):
     config="aliquotLamp_p100"
-    basic=["target_c","target_p","start_tip","start_tube"]
+    basic=["target_c","target_p","start_tip","start_tube","src_vol"]
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))

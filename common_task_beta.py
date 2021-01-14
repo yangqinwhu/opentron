@@ -48,7 +48,7 @@ class RobotClass:
 
     def assign_deck(self,tip_name = "opentrons_96_filtertiprack_200ul",
         tip_slots = ["7","8"],pip_name = "p300_multi",pip_location="left",
-        trash_slot="9",
+        trash_slot="None",
         src_name="None",src_slots = ["2"],
         dest_name = 'nest_96_wellplate_100ul_pcr_full_skirt',
         dest_slots =["3"],**kwarg):
@@ -132,9 +132,7 @@ class PipetteClass:
             self.pipette.dispense(volume, well.bottom(disp_bottom))
             well = _next_well(well)[1]
 
-
-
-    def p_transfer(self,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=1,asp_bottom=2,disp_bottom=3,blowout = True,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0,**kwarg):
+    def p_transfer(self,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=1,asp_bottom=2,disp_bottom=3,blowout = False,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0,**kwarg):
         """ s: source well  d: destination well b: buffer well.
         dispense: how many times the same to be dispensed
         Transfer from source well: s to destination well"""
@@ -145,6 +143,7 @@ class PipetteClass:
         if reverse_pip:
             asp_vol+=reverse_vol
         total_vol = asp_vol+air_vol+buffer_vol
+        self.asp_vol=total_vol
 
         start = timeit.default_timer()
         st = timeit.default_timer() if get_time else 1
@@ -197,11 +196,12 @@ class PipetteClass:
                 self.pipette.return_tip()
                 st = timeit.default_timer() if get_time else st
             else:
-                self.pipette.drop_tip(home_after=False)
+                self.pipette.drop_tip(home_after=False,)
                 self.pipette.home()
                 print ("Tip changed")
                 self._log_time(st,event = 'Drop tip') if get_time else 1
                 st = timeit.default_timer() if get_time else st
+
 
 class RunLog:
     def __init__(self):
@@ -257,6 +257,14 @@ class RunRobot(RobotClass):
     def _update_one(self,c,n):
         return n,n+1
 
+    def _src_empty(self,trans_v,src_vol=150,**kwarg):
+        self.src_remaining_vol-=trans_v
+        print (f"{self.src_remaining_vol}ul remaining in {self.current_srctube}")
+        if self.src_remaining_vol>0:
+            return 0
+        else:
+            return 1
+
     def _aliquot(self,target_c=1,**kwarg):
         disps=_number_to_list(target_c,kwarg["disp"])
         kwarg.update({"reverse_pip":1})
@@ -264,9 +272,13 @@ class RunRobot(RobotClass):
         for disp in disps:
             h+=1
             kwarg.pop("disp")
-            self._set_aliquot(disp=disp)
             kwarg.update({"chgTip":0})
             kwarg.update({"disp":disp})
+            trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
+            if self._src_empty(trans_v,**kwarg):
+                self.current_srctube,self.next_srctube=self._update_one(self.current_srctube,self.next_srctube)
+                self.src_remaining_vol=self.src_vol-trans_v
+            self._set_aliquot(disp=disp)
             for i, (s, d) in enumerate(zip(self.sts,self.dts)):
                 if i==(len(self.dts)-1) and h==(len(disps)):
                     kwarg.update({"chgTip":1})
@@ -279,22 +291,36 @@ class RunRobot(RobotClass):
         self._aliquot(**kwarg)
         self.current_desttube=11
         s=self.robot.src_plates[self.current_srcplate].rows()[0][11]
-        d=self.robot.dest_tubes[self.current_desttube]
+        d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
         kwarg.update({"disp":1})
         kwarg.update({"chgTip":1})
         self.mp.p_transfer(s,d,**kwarg)
 
     def aliquot_dtt_p100(self,target_p=1,**kwarg):
+        self.src_vol=kwarg["src_vol"]
+        self.src_remaining_vol=self.src_vol
         for p in range(0,target_p):
             self._aliquot(**kwarg)
             self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
-            self.init_well(**kwarg)
+            self.current_desttube=kwarg["start_dest"]-1
 
     def aliquot_lamp_p100(self,target_p=1,**kwarg):
+        self.src_vol=kwarg["src_vol"]
+        self.src_remaining_vol=self.src_vol
         for p in range(0,target_p):
             self._aliquot_lamp_one_plate(**kwarg)
             self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
-            self.init_well(**kwarg)
+            self.current_desttube=kwarg["start_dest"]-1
 
     def _sample_to_lamp(self,**kwarg):
         pass
+
+
+r=RunRobot()
+p=r.robot.multi_pipette.pipette
+p
+
+trash.wells()
+p.pick_up_tip()
+drop_tip_location=p.trash_container.wells()[0].bottom(50)
+p.move_to(drop_tip_location)
