@@ -410,7 +410,7 @@ class RunPage(tk.Frame):
         deck=self._get_deck()
         for r in [3,2,1,0]:
             for c in [0,1,2]:
-                tk.Button(master, text =f"{s}\n {deck[s]}", font=('Arial')).grid(row=r, column=c,columnspan=1,sticky="ewns")
+                tk.Label(master, text =f"{s}\n {deck[s]}", font=('Arial'),relief="solid").grid(row=r, column=c,columnspan=1,sticky="ewns")
                 s+=1
 
     def config_side_buttons(self):
