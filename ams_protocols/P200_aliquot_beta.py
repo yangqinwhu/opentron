@@ -24,25 +24,38 @@ def _conca_param(**kwarg):
             param=param
     return param
 
+def prot_deco(func):
+    def inner(**kwarg):
+        print (f'******************** {kwarg["protocol"]["run"]} ****************')
+        r.init_protocol(**_conca_param(**kwarg))
+        print ("ok")
+        func(**kwarg)
+    return inner
+
 def initialize_robot(**kwarg):
     global r
     r=ct.RunRobot(**_conca_param(**kwarg))
 
+@prot_deco
 def aliquot_dtt(**kwarg):
-    print (f'******************** {kwarg["protocol"]["run"]} ****************')
-    r.init_protocol(**_conca_param(**kwarg))
     r.aliquot_dtt_p100(**_conca_param(**kwarg))
 
+@prot_deco
 def aliquot_lamp(**kwarg):
-    print (f'******************** {kwarg["protocol"]["run"]} ****************')
-    r.init_protocol(**_conca_param(**kwarg))
     r.aliquot_lamp_p100(**_conca_param(**kwarg))
+
+@prot_deco
+def sample_to_lamp(**kwarg):
+    r.sample_to_lamp(**_conca_param(**kwarg))
+
 
 def run(**kwarg):
     if kwarg["protocol"]["run"]=="aliquotDTT":
         aliquot_dtt(**kwarg)
     elif kwarg["protocol"]["run"]=="aliquotLamp":
         aliquot_lamp(**kwarg)
+    elif kwarg["protocol"]["run"]=="sampleToLamp":
+        sample_to_lamp(**kwarg)
 
 
 def test_run_p100():
@@ -143,3 +156,7 @@ def test_run_p20():
 
 
 # test_run_p100()
+# def aliquot_lamp(**kwarg):
+#     print (f'******************** {kwarg["protocol"]["run"]} ****************')
+#     r.init_protocol(**_conca_param(**kwarg))
+#     r.aliquot_lamp_p100(**_conca_param(**kwarg))

@@ -161,8 +161,6 @@ class RunRobot:
         elif jsondata["protocol"]["file"]=="p200_aliquot":
             # self.sele('sample_to_lamp_96well')
             self.prot=p200_aliquot
-            print ("debug")
-            print (jsondata["protocol"]["run"])
         if not jsondata["robot_status"]["initialized"]:
             self.prot.initialize_robot(**jsondata)
             print ("opentron initialized")

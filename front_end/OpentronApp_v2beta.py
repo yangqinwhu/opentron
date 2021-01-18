@@ -6,8 +6,8 @@ import json,requests,copy
 
 BOTTON_FONT=20
 LABEL_FONT=8
-#server_ip = "127.0.0.1"
-server_ip = "192.168.1.46"
+server_ip = "127.0.0.1"
+# server_ip = "192.168.1.46"
 
 PORT = 8000
 
@@ -49,22 +49,33 @@ saliva_to_dtt={
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
+        "tip_slots":["7","8"],
+        "pip_name":"p300_multi",
+        "pip_location":"left",
+        "trash_slots":["9"],
+        "src_name":"micronic_96_wellplate_1400ul",
+        "src_slots": ["1"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["2","3","4","5","6"],
+    }
 }
 
 sample_to_lamp_96well={
     "protocol":{
-    "file":"sample_to_lamp_96well",
-    "run":"p200_aliqot"
+    "file":"p200_aliquot",
+    "run":"sampleToLamp"
     },
     "robot_status":{
         "initialized":0,
         "to_run":1,
     },
     "robot_param":{
-        "simulate":True,
+        "simulate":False,
         "deck":"sample_to_lamp_96well_n7_rp4",
     },
     "sample_info":{
+        "target_columns":1,
         "samples":8,
         "sample_per_column":8,
         "total_batch":1,
@@ -77,7 +88,7 @@ sample_to_lamp_96well={
     },
     "transfer_param":{
         "samp_vol":5,
-        "reverse_vol":0,
+        "reverse_vol":5,
         "rp4":0,
         "air_vol": 0,
         "disp":1,
@@ -86,11 +97,21 @@ sample_to_lamp_96well={
         'mix':0,
         "get_time":1,
         'returnTip':False,
-        "aspirate_rate": 7.6,
-        "dispense_rate": 7.6,
+        "aspirate_rate": 2.5,
+        "dispense_rate": 2.5,
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
+        "tip_slots":["10","11"],
+        "pip_name":"p20_multi_gen2",
+        "pip_location":"right",
+        "trash_slot":["9"],
+        "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
+        "src_slots": ["1"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["2","4","5","6"],
+    }
 }
 
 aliquot_p20_96well={
@@ -133,6 +154,16 @@ aliquot_p20_96well={
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
+        "tip_slots":["7","8"],
+        "pip_name":"p300_multi",
+        "pip_location":"left",
+        "trash_slots":["9"],
+        "src_name":"micronic_96_wellplate_1400ul",
+        "src_slots": ["1"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["2","3","4","5","6"],
+    }
 }
 
 aliquot_p100_96well={
@@ -149,8 +180,8 @@ aliquot_p100_96well={
         "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
     },
     "sample_info":{
-        "target_c":2,
-        "target_p":1,
+        "target_columns":2,
+        "target_plates":1,
         "src_vol":150,
         "total_batch":1,
         "start_batch":1,
@@ -180,15 +211,13 @@ aliquot_p100_96well={
         "tip_slots":["7","8"],
         "pip_name":"p300_multi",
         "pip_location":"left",
-        "trash_slot":"9",
-        "src_name":"None",
+        "trash_slots":["9"],
+        "src_name":"micronic_96_wellplate_1400ul",
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
         "dest_slots":["2","3","4","5","6"],
     }
 }
-
-
 
 
 class OpentronApp(tk.Tk):
@@ -227,7 +256,7 @@ class HomePage(tk.Frame):
     def create_widgets(self):
         tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('DTTPage')).place(
             x=20,y=40,height=150,width=360)
-        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('LAMPPage')).place(
+        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
             x=420,y=40,height=150,width=360)
         tk.Button(self,text='Aliquot DTT \n P100',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
             x=20,y=210,height=150,width=360)
@@ -264,6 +293,7 @@ class RunPage(tk.Frame):
         self.BottomFrame.place(x=150,y=350,height=50,width=450) # Frame 2 is the bottom button
         self.FormFrame = tk.Frame(self) # param is the parameter region
         self.FormFrame.place(x=150,y=0,height=350,width=450)
+        self.DeckFrame=tk.Frame(self,relief=tk.RIDGE)
         self.frm_txt = tk.Text(self)
         self.frm_txt.place(
             x=600,y=20,height=360,width=200)
@@ -274,6 +304,7 @@ class RunPage(tk.Frame):
         self.create_bottom_buttons()
         ### Input area
         self.create_forms(self.defaultParams,basic=True)
+        self.create_deck_btn()
 
     def _create_form(self,dic,master):
         for idx, text in enumerate(dic.keys()):
@@ -288,7 +319,10 @@ class RunPage(tk.Frame):
         master=self.FormFrame
         master.destroy()
         self.FormFrame = tk.Frame(self)
-        self.FormFrame.place(x=150,y=0,height=350,width=450)
+        if basic:
+            self.FormFrame.place(x=150,y=0,height=150,width=450)
+        else:
+            self.FormFrame.place(x=150,y=0,height=350,width=450)
         master=self.FormFrame
         self.form_row=0
         self.form_column=0
@@ -356,6 +390,29 @@ class RunPage(tk.Frame):
         for i in range(7):
             tk.Label(master, text="",font=('Arial',LABEL_FONT)).grid(row=(i*3+2), column=0,sticky="e")
 
+    def _get_deck(self):
+        deck={}
+        for s in range(1,13):
+            for i,k in self.defaultParams["deck_param"].items():
+                if str(s) in k and isinstance(k,list):
+                    deck[s]=i
+                    break
+                else:
+                    deck[s]= "None"
+        return deck
+
+    def create_deck_btn(self):
+        self.DeckFrame.grid_rowconfigure(4, weight=10)
+        self.DeckFrame.grid_columnconfigure(3, weight=10)
+        self.DeckFrame.place(x=150,y=150,height=200,width=450)
+        master = self.DeckFrame
+        s=1
+        deck=self._get_deck()
+        for r in [3,2,1,0]:
+            for c in [0,1,2]:
+                tk.Button(master, text =f"{s}\n {deck[s]}", font=('Arial')).grid(row=r, column=c,columnspan=1,sticky="ewns")
+                s+=1
+
     def config_side_buttons(self):
         if self.initialized:
             self.run_btn.config(state=tk.NORMAL)
@@ -370,8 +427,6 @@ class RunPage(tk.Frame):
         self.master.showPage('HomePage')
         self.initialized=0
         self.config_side_buttons()
-
-
 
     def init_robot(self):
         url=self.robot_url+'/init_robot'
@@ -439,11 +494,14 @@ class RunPage(tk.Frame):
         self.create_forms(self.defaultParams,basic=False)
         self.basic_btn.config(state=tk.NORMAL)
         self.adv_btn.config(state=tk.DISABLED)
+        self.DeckFrame.destroy()
+        self.DeckFrame=tk.Frame(self)
 
     def get_basic_forms(self):
         self.create_forms(self.defaultParams,basic=True)
         self.basic_btn.config(state=tk.DISABLED)
         self.adv_btn.config(state=tk.NORMAL)
+        self.create_deck_btn()
 
 class DTTPage(RunPage):
     config="saliva_to_dtt"
@@ -456,8 +514,9 @@ class DTTPage(RunPage):
     pass
 
 class LAMPPage(RunPage):
-    config="sample_to_lamp_96well"
+    config="sampleToLamp_96well"
     pp=f".{config}.configure"
+    basic=["target_columns","rp4","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -468,17 +527,16 @@ class LAMPPage(RunPage):
 class AliquotDTTPage(RunPage):
     config="aliquotDTT_p100"
     pp=f".{config}.configure"
-    basic=["target_c","target_p","start_tip","start_tube","src_vol"]
+    basic=["target_columns","target_plates","start_tip","start_tube","src_vol"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
         defaultParams=json.loads(json.dumps(aliquot_p100_96well))
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
-
 class AliquotLAMPPage(RunPage):
     config="aliquotLamp_p100"
-    basic=["target_c","target_p","start_tip","start_tube","src_vol"]
+    basic=["target_columns","target_plates","start_tip","start_tube","src_vol"]
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
