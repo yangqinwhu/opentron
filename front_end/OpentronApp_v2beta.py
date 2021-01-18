@@ -7,7 +7,7 @@ import json,requests,copy
 BOTTON_FONT=20
 LABEL_FONT=8
 server_ip = "127.0.0.1"
-# server_ip = "192.168.1.46"
+server_ip = "192.168.1.46"
 
 PORT = 8000
 
