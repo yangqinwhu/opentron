@@ -267,6 +267,7 @@ class RunRobot(RobotClass):
         else:
             return 1
 
+
     def _aliquot(self,target_columns=1,**kwarg):
         disps=_number_to_list(target_columns,kwarg["disp"])
         kwarg.update({"reverse_pip":1})
@@ -324,6 +325,31 @@ class RunRobot(RobotClass):
                 self.mp.p_transfer(s,d,**kwarg)
             self.next_desttube=self.current_desttube+1
             self.current_desttube,self.next_desttube=self._update_one(self.current_desttube,self.next_desttube)
+
+    def _aliquot_p20_one_plate(self,target_columns=1,**kwarg):
+        kwarg.update({"reverse_pip":1})
+        trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
+        if self._src_empty(trans_v,**kwarg):
+            self.current_srctube,self.next_srctube=self._update_one(self.current_srctube,self.next_srctube)
+            self.src_remaining_vol=self.src_vol-trans_v
+        for i in range(0,target_columns):
+            s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
+            d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
+            chgTip=1 if i==target_columns-1 else 0
+            kwarg.update({"chgTip":chgTip})
+            self.mp.p_transfer(s,d,**kwarg)
+            kwarg.update({"reverse_pip":0})
+            self.next_desttube=self.current_desttube+1
+            self.current_desttube,self.next_desttube=self._update_one(self.current_desttube,self.next_desttube)
+
+    def aliquot_dtt_p20(self,target_plates=1,**kwarg):
+        self.src_vol=kwarg["src_vol"]
+        self.src_remaining_vol=self.src_vol
+        for p in range(0,target_plates):
+            self._aliquot_p20_one_plate(**kwarg)
+            self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
+            self.current_desttube=kwarg["start_dest"]-1
+
 
 
 

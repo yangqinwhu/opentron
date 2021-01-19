@@ -15,6 +15,14 @@ sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 importlib.reload(ct)
 
 
+def _log_time(start_time,event = 'This step',print_log=1):
+    stop = timeit.default_timer()
+    run_time = stop - start_time
+    unit = "sec" if run_time<60 else "min"
+    run_time = run_time/60 if unit == "min" else run_time
+    log ='{} takes {:.2} {}'.format(event,run_time,unit)
+    print (log)
+
 def _conca_param(**kwarg):
     param={}
     for k,i in kwarg.items():
@@ -26,10 +34,11 @@ def _conca_param(**kwarg):
 
 def prot_deco(func):
     def inner(**kwarg):
+        start = timeit.default_timer()
         print (f'******************** {kwarg["protocol"]["run"]} ****************')
         r.init_protocol(**_conca_param(**kwarg))
-        print ("ok")
         func(**kwarg)
+        _log_time(start,event = kwarg["protocol"]["run"])
     return inner
 
 def initialize_robot(**kwarg):
@@ -41,12 +50,21 @@ def aliquot_dtt(**kwarg):
     r.aliquot_dtt_p100(**_conca_param(**kwarg))
 
 @prot_deco
+def aliquot_dtt_p20(**kwarg):
+    r.aliquot_dtt_p20(**_conca_param(**kwarg))
+
+@prot_deco
 def aliquot_lamp(**kwarg):
     r.aliquot_lamp_p100(**_conca_param(**kwarg))
 
 @prot_deco
 def sample_to_lamp(**kwarg):
     r.sample_to_lamp(**_conca_param(**kwarg))
+
+@prot_deco
+def aliquot_dtt_p20(**kwarg):
+    r.aliquot_dtt_p20(**_conca_param(**kwarg))
+
 
 
 def run(**kwarg):
@@ -56,40 +74,47 @@ def run(**kwarg):
         aliquot_lamp(**kwarg)
     elif kwarg["protocol"]["run"]=="sampleToLamp":
         sample_to_lamp(**kwarg)
+    elif kwarg["protocol"]["run"]=="aliquotDTTP20":
+        aliquot_dtt_p20(**kwarg)
 
 
 def test_run_p100():
     run_param={
+        "protocol":{
+        "file":"p200_aliquot",
+        "run":"p200_aliqot"
+        },
         "robot_param":{
             "simulate":True,
             "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
         },
         "sample_info":{
-            "target_c":10,
-            "target_p":2,
+            "target_columns":12,
+            "target_plates":1,
             "samples":8,
             "sample_per_column":8,
             "total_batch":1,
             "start_batch":1,
             "start_tube":1,
             "start_dest":1,
-            "start_tip":1,
+            "start_tip":2,
             "replicates":1,
         },
         "transfer_param":{
             "samp_vol":15,
-            "reverse_vol":10,
+            "reverse_vol":15,
+            "src_vol":150,
             "air_vol": 0,
             "disp":5,
-            "asp_bottom":-2,
-            "disp_bottom":-10,
+            "asp_bottom":-3,
+            "disp_bottom":-8,
             'mix':0,
             "get_time":1,
             'returnTip':False,
-            "aspirate_rate": 120,
-            "dispense_rate": 20,
-            "tip_press_increment":0.3,
-            "tip_presses" : 1,
+            "aspirate_rate": 60,
+            "dispense_rate": 40,
+            "tip_press_increment":0.6,
+            "tip_presses" : 3,
         },
         "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
             "tip_slots":["7","8"],
@@ -108,13 +133,21 @@ def test_run_p100():
 
 def test_run_p20():
     run_param={
+        "protocol":{
+        "file":"p200_aliquot",
+        "run":"sampleToLamp"
+        },
+        "robot_status":{
+            "initialized":0,
+            "to_run":1,
+        },
         "robot_param":{
             "simulate":True,
-            "deck":"saliva_to_dtt_micronic_96_wellplate_1400ul",
+            "deck":"sample_to_lamp_96well_n7_rp4",
         },
         "sample_info":{
-            "target_c":10,
-            "target_p":2,
+            "target_columns":12,
+            "target_plates":1,
             "samples":8,
             "sample_per_column":8,
             "total_batch":1,
@@ -122,40 +155,43 @@ def test_run_p20():
             "start_tube":1,
             "start_dest":1,
             "start_tip":1,
-            "replicates":1,
+            "replicates":2,
+            "repl_chg_tip":0,
         },
         "transfer_param":{
-            "samp_vol":15,
-            "reverse_vol":10,
+            "samp_vol":5,
+            "reverse_vol":5,
+            "src_vol":150,
+            "rp4":0,
             "air_vol": 0,
-            "disp":5,
-            "asp_bottom":-2,
-            "disp_bottom":-10,
+            "disp":1,
+            "asp_bottom":0,
+            "disp_bottom":-2,
             'mix':0,
             "get_time":1,
             'returnTip':False,
-            "aspirate_rate": 120,
-            "dispense_rate": 20,
+            "aspirate_rate": 2.5,
+            "dispense_rate": 2.5,
             "tip_press_increment":0.3,
             "tip_presses" : 1,
         },
-        "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
-            "tip_slots":["7","8"],
-            "pip_name":"p300_multi",
-            "pip_location":"left",
-            "trash_slot":"9",
-            "src_name":"None",
-            "src_slots": ["2"],
+        "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
+            "tip_slots":["10","11"],
+            "pip_name":"p20_multi_gen2",
+            "pip_location":"right",
+            "trash_slot":["9"],
+            "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
+            "src_slots": ["1"],
             "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-            "dest_slots":["5","6","10","11","1"]
+            "dest_slots":["2","4","5","6"],
         }
     }
 
     initialize_robot(**run_param)
-    aliquot_dtt(**run_param)
+    aliquot_dtt_p20(**run_param)
 
 
-# test_run_p100()
+# test_run_p20()
 # def aliquot_lamp(**kwarg):
 #     print (f'******************** {kwarg["protocol"]["run"]} ****************')
 #     r.init_protocol(**_conca_param(**kwarg))

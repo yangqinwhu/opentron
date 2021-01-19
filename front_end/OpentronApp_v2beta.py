@@ -116,8 +116,8 @@ sample_to_lamp_96well={
 
 aliquot_p20_96well={
     "protocol":{
-    "file":"sample_to_lamp_96well",
-    "run":"p20_aliqot"
+    "file":"p200_aliquot",
+    "run":"aliquotDTTP20"
     },
     "robot_status":{
         "initialized":0,
@@ -125,9 +125,11 @@ aliquot_p20_96well={
     },
     "robot_param":{
         "simulate":True,
-        "deck":"sample_to_lamp_96well",
+        "deck":"sample_to_lamp_96well_n7_rp4",
     },
     "sample_info":{
+        "target_columns":12,
+        "target_plates":1,
         "samples":8,
         "sample_per_column":8,
         "total_batch":1,
@@ -140,8 +142,9 @@ aliquot_p20_96well={
     },
     "transfer_param":{
         "samp_vol":10,
-        "reverse_vol":3,
-        "blowout":0,
+        "reverse_vol":5,
+        "src_vol":150,
+        "rp4":0,
         "air_vol": 0,
         "disp":1,
         "asp_bottom":0,
@@ -149,22 +152,23 @@ aliquot_p20_96well={
         'mix':0,
         "get_time":1,
         'returnTip':False,
-        "aspirate_rate": 7.6,
-        "dispense_rate": 7.6,
+        "aspirate_rate": 2.5,
+        "dispense_rate": 2.5,
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
-    "deck_param":{"tip_name":"opentrons_96_filtertiprack_200ul",
-        "tip_slots":["7","8"],
-        "pip_name":"p300_multi",
-        "pip_location":"left",
-        "trash_slots":["9"],
-        "src_name":"micronic_96_wellplate_1400ul",
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
+        "tip_slots":["10","11"],
+        "pip_name":"p20_multi_gen2",
+        "pip_location":"right",
+        "trash_slot":["9"],
+        "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["2","3","4","5","6"],
+        "dest_slots":["2","4","5","6"],
     }
 }
+
 
 aliquot_p100_96well={
     "protocol":{
@@ -182,7 +186,6 @@ aliquot_p100_96well={
     "sample_info":{
         "target_columns":2,
         "target_plates":1,
-        "src_vol":150,
         "total_batch":1,
         "start_batch":1,
         "start_tube":1,
@@ -195,6 +198,7 @@ aliquot_p100_96well={
     "transfer_param":{
         "samp_vol":10,
         "reverse_vol":10,
+        "src_vol":150,
         "air_vol": 0,
         "disp":6,
         "asp_bottom":-3,
@@ -260,7 +264,7 @@ class HomePage(tk.Frame):
             x=420,y=40,height=150,width=360)
         tk.Button(self,text='Aliquot DTT \n P100',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
             x=20,y=210,height=150,width=360)
-        tk.Button(self,text='Aliquot LAMP \n P100',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
+        tk.Button(self,text='Aliquot DTT \n P20',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
             x=420,y=210,height=150,width=360)
         tk.Button(self,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
             x=340,y=380,height=50,width=120)
@@ -535,13 +539,15 @@ class AliquotDTTPage(RunPage):
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
 class AliquotLAMPPage(RunPage):
-    config="aliquotLamp_p100"
+    # config="aliquotLamp_p100"
+    config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
     basic=["target_columns","target_plates","start_tip","start_tube","src_vol"]
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
-        defaultParams=json.loads(json.dumps(aliquot_p100_96well))
+        # defaultParams=json.loads(json.dumps(aliquot_p100_96well))
+        defaultParams=json.loads(json.dumps(aliquot_p20_96well))
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
 

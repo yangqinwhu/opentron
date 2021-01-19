@@ -23,8 +23,8 @@ micronic_96_wellplate_1400ul = """{"ordering":[["A1","B1","C1","D1","E1","F1","G
 metadata = {'apiLevel': '2.7'}
 
 def run(protocol):
-    cali_p20=True
-    cali_p200=False
+    cali_p20=1
+    cali_p200=0
     if cali_p200:
         p200_tip_name = "opentrons_96_filtertiprack_200ul"
         p200_tip_slots = ["2"]

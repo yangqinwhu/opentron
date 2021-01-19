@@ -1,4 +1,8 @@
 #http server
+"""
+Note:If you need to control gpios, first stop the robot server with systemctl stop opentrons-robot-server.
+Until you restart the server with systemctl start opentrons-robot-server, you will be unable to control the robot using the Opentrons app.
+"""
 import socketserver
 from http.server import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
