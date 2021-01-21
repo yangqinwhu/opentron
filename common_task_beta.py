@@ -362,6 +362,13 @@ class RunRobot(RobotClass):
                 self.mp.p_transfer(s,d,**kwarg)
             self.current_desttube+=1
             self.current_srctube+=1
+        if target_columns<11:    
+            s=self.robot.src_plates[self.current_srcplate].rows()[0][11]
+            d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
+            self.mp.p_transfer(s,d,**kwarg)
+            if rp4:
+                d=self.robot.dest_plates[self.current_destplate+1].rows()[0][11]
+                self.mp.p_transfer(s,d,**kwarg)
 
     def _aliquot_p20_one_plate(self,target_columns=1,**kwarg):
         kwarg.update({"reverse_pip":1})

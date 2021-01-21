@@ -97,7 +97,7 @@ sample_to_lamp_96well={
         "tip_presses" : 1,
     },
     "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-        "tip_slots":["5","7","8"],
+        "tip_slots":["7","8","11"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
         "trash_slots":["9"],
