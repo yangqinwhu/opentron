@@ -12,7 +12,7 @@ import importlib
 import sys,json
 sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
-importlib.reload(ct)
+# importlib.reload(ct)
 
 
 def _log_time(start_time,event = 'This step',print_log=1):
@@ -39,11 +39,13 @@ def prot_deco(func):
         r.init_protocol(**_conca_param(**kwarg))
         func(**kwarg)
         _log_time(start,event = kwarg["protocol"]["run"])
+        r.statusQ.put("RUN FINISHED")
     return inner
 
 def initialize_robot(**kwarg):
     global r
     r=ct.RunRobot(**_conca_param(**kwarg))
+    r.statusQ.put("INITIALIZED")
 
 @prot_deco
 def aliquot_dtt(**kwarg):
@@ -207,13 +209,7 @@ def test_run_p20():
 
 #
 # test_run_p20()
-# # def aliquot_lamp(**kwarg):
-# #     print (f'******************** {kwarg["protocol"]["run"]} ****************')
-# #     r.init_protocol(**_conca_param(**kwarg))
-# #     r.aliquot_lamp_p100(**_conca_param(**kwarg))
-# #
-# # r.deactivate_tm()
-# # r.robot.tm_deck.set_temperature(0)
-# # r.robot.tm_deck.temperature
-# r
-# p.trash_container
+# while r.statusQ.not_empty:
+#     print (r.statusQ.get())
+#     time.sleep(0.1)
+#     continue

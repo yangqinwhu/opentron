@@ -1,7 +1,8 @@
 from opentrons import protocol_api
 import sys,json,timeit,time,math
-# This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
 import importlib
+from queue import Queue
+
 sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
 
@@ -143,7 +144,7 @@ class PipetteClass:
         for i in range(0,disp):
             # status="current dispensing well is {}".format(well)
             status = "Dispense {:.1f} uL to {}".format(volume,well)
-            print (status)
+            self.status.set_status(status)
             self.pipette.dispense(volume, well.bottom(disp_bottom))
             well = _next_well(well)[1]
 
@@ -185,7 +186,7 @@ class PipetteClass:
 
         self.pipette.aspirate(asp_vol, s.bottom(asp_bottom))
         status = "Aspirate {:.1f} uL from {}".format(asp_vol,s)
-        print (status)
+        self.status.set_status(status)
         self.pipette.air_gap(air_vol)
         self._log_time(st,event = 'Aspirate') if get_time else 1
         st = timeit.default_timer() if get_time else 1
@@ -216,7 +217,8 @@ class PipetteClass:
                 # self.pipette.drop_tip(home_after=False,)
                 # self.pipette.home()
                 self.pipette.drop_tip()
-                print (f"Tip dropped to {self.pipette.trash_container}")
+                status=f"Tip dropped to {self.pipette.trash_container}"
+                self.status.set_status(status)
                 self._log_time(st,event = 'Drop tip') if get_time else 1
                 st = timeit.default_timer() if get_time else st
 
@@ -224,9 +226,11 @@ class PipetteClass:
 class RunLog:
     def __init__(self):
         self.status=""
+        self.statusQ=Queue()
 
     def set_status(self,s):
         self.status=s
+        self.statusQ.put(s)
         print (s)
 
 class RunRobot(RobotClass):
@@ -235,6 +239,7 @@ class RunRobot(RobotClass):
         self.mp=self.robot.multi_pipette
         self.init_protocol(**kwarg)
         self.init_tm(**kwarg)
+        self.statusQ=self.robot.status.statusQ
 
     def init_protocol(self,**kwarg):
         self.init_plate(**kwarg)
