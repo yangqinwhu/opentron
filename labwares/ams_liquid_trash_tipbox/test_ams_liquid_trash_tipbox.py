@@ -25,12 +25,12 @@ RATE = 0.25  # % of default speeds
 SLOWER_RATE = 0.1
 
 PIPETTE_MOUNT = 'right'
-PIPETTE_NAME = 'p300_single'
+PIPETTE_NAME = 'p20_single_gen2'
 
 TIPRACK_SLOT = '5'
-TIPRACK_LOADNAME = 'opentrons_96_tiprack_300ul'
+TIPRACK_LOADNAME = 'opentrons_96_tiprack_20ul'
 
-LABWARE_DEF_JSON = """{"ordering":[["A1"]],"brand":{"brand":"ams_liquid_trash","brandId":[]},"metadata":{"displayName":"ams_liquid_trash_tipbox","displayCategory":"reservoir","displayVolumeUnits":"µL","tags":[]},"dimensions":{"xDimension":127.76,"yDimension":85.47,"zDimension":80},"wells":{"A1":{"depth":70,"totalLiquidVolume":10000,"shape":"rectangular","xDimension":100,"yDimension":70,"x":64,"y":43.47,"z":10}},"groups":[{"metadata":{"wellBottomShape":"flat"},"wells":["A1"]}],"parameters":{"format":"irregular","quirks":["centerMultichannelOnWells","touchTipDisabled"],"isTiprack":false,"isMagneticModuleCompatible":false,"loadName":"ams_liquid_trash_tipbox"},"namespace":"custom_beta","version":1,"schemaVersion":2,"cornerOffsetFromSlot":{"x":0,"y":0,"z":0}}"""
+LABWARE_DEF_JSON = """{"ordering":[["A1"]],"brand":{"brand":"ams_liquid_trash","brandId":[]},"metadata":{"displayName":"ams_liquid_trash_tipbox","displayCategory":"reservoir","displayVolumeUnits":"µL","tags":[]},"dimensions":{"xDimension":127.76,"yDimension":85.47,"zDimension":70},"wells":{"A1":{"depth":70,"totalLiquidVolume":10000,"shape":"rectangular","xDimension":100,"yDimension":70,"x":64,"y":43.47,"z":0}},"groups":[{"metadata":{"wellBottomShape":"flat"},"wells":["A1"]}],"parameters":{"format":"irregular","quirks":["centerMultichannelOnWells","touchTipDisabled"],"isTiprack":false,"isMagneticModuleCompatible":false,"loadName":"ams_liquid_trash_tipbox"},"namespace":"custom_beta","version":1,"schemaVersion":2,"cornerOffsetFromSlot":{"x":0,"y":0,"z":0}}"""
 LABWARE_DEF = json.loads(LABWARE_DEF_JSON)
 LABWARE_LABEL = LABWARE_DEF.get('metadata', {}).get(
     'displayName', 'test labware')

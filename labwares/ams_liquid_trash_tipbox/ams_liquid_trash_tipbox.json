@@ -17,7 +17,7 @@
     "dimensions": {
         "xDimension": 127.76,
         "yDimension": 85.47,
-        "zDimension": 80
+        "zDimension": 70
     },
     "wells": {
         "A1": {
@@ -28,7 +28,7 @@
             "yDimension": 70,
             "x": 64,
             "y": 43.47,
-            "z": 10
+            "z": 0
         }
     },
     "groups": [

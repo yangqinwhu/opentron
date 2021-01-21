@@ -65,7 +65,11 @@ def sample_to_lamp(**kwarg):
 def aliquot_dtt_p20(**kwarg):
     r.aliquot_dtt_p20(**_conca_param(**kwarg))
 
+def deactivate_tm():
+    r.robot.tm_deck.deactivate()
 
+def set_temp():
+    r.robot.tm_deck.start_set_temperature(4)
 
 def run(**kwarg):
     if kwarg["protocol"]["run"]=="aliquotDTT":
@@ -76,6 +80,10 @@ def run(**kwarg):
         sample_to_lamp(**kwarg)
     elif kwarg["protocol"]["run"]=="aliquotDTTP20":
         aliquot_dtt_p20(**kwarg)
+    elif kwarg["protocol"]["run"]=="set_temp":
+        set_temp()
+    elif kwarg["protocol"]["run"]=="deactivate_tm":
+        deactivate_tm()
 
 
 def test_run_p100():
@@ -132,7 +140,7 @@ def test_run_p100():
     aliquot_dtt(**run_param)
 
 def test_run_p20():
-    run_param={
+    run_param_p20={
         "protocol":{
         "file":"p200_aliquot",
         "run":"sampleToLamp"
@@ -142,8 +150,10 @@ def test_run_p20():
             "to_run":1,
         },
         "robot_param":{
-            "simulate":True,
+            "simulate":False,
             "deck":"sample_to_lamp_96well_n7_rp4",
+            "tm":"src",
+            "tm_temp":4,
         },
         "sample_info":{
             "target_columns":12,
@@ -154,36 +164,38 @@ def test_run_p20():
             "start_batch":1,
             "start_tube":1,
             "start_dest":1,
-            "start_tip":1,
+            "start_tip":2,
             "replicates":2,
             "repl_chg_tip":0,
         },
         "transfer_param":{
-            "samp_vol":5,
+            "samp_vol":10,
             "reverse_vol":5,
-            "src_vol":150,
+            "src_vol":300,
             "rp4":0,
             "air_vol": 0,
             "disp":1,
-            "asp_bottom":0,
-            "disp_bottom":-2,
+            "asp_bottom":11,
+            "disp_bottom":0,
             'mix':0,
             "get_time":1,
             'returnTip':False,
-            "aspirate_rate": 2.5,
-            "dispense_rate": 2.5,
+            "aspirate_rate": 7.6,
+            "dispense_rate": 7.6,
             "tip_press_increment":0.3,
             "tip_presses" : 1,
         },
         "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-            "tip_slots":["10","11"],
+            "tip_slots":["7","8"],
             "pip_name":"p20_multi_gen2",
             "pip_location":"right",
             "trash_slot":["9"],
             "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
-            "src_slots": ["1"],
-            "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-            "dest_slots":["2","4","5","6"],
+            "src_slots": ["6"],
+            "dest_name": 'nest_96_wellplate_2ml_deep',
+            "dest_slots":["1","2","3","4","5"],
+            "tm_name":'nest_96_wellplate_2ml_deep',
+            "temp_module_slot": ["10"],
         }
     }
 
@@ -196,3 +208,7 @@ def test_run_p20():
 #     print (f'******************** {kwarg["protocol"]["run"]} ****************')
 #     r.init_protocol(**_conca_param(**kwarg))
 #     r.aliquot_lamp_p100(**_conca_param(**kwarg))
+#
+# r.deactivate_tm()
+# r.robot.tm_deck.set_temperature(0)
+# r.robot.tm_deck.temperature

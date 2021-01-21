@@ -15,7 +15,6 @@ def _number_to_list(n,p):
             l.append(p)
     return l
 
-
 class RobotClass:
     def __init__(self,simulate =True,**kwarg):
         self.status=RunLog()
@@ -61,6 +60,9 @@ class RobotClass:
         self.dest_name=dest_name
         self.dest_slots=dest_slots
         self.trash_slots=trash_slots
+        if "temp_module_slot" in kwarg.keys():
+            self.temp_module_slot=kwarg["temp_module_slot"]
+            self.tm_name=kwarg["tm_name"]
 
     def load_deck(self,**kwarg):
         """Single source, single destination"""
@@ -68,6 +70,16 @@ class RobotClass:
         self.assign_deck(**kwarg)
         self.tips = [self.protocol.load_labware(self.tip_name, slot) for slot in self.tip_slots]
 
+        if "tm" in kwarg.keys():
+            if len(kwarg["tm"])>1:
+                self.tm_deck = self.protocol.load_module('temperature module', self.temp_module_slot[0])
+                self.tm_deck.start_set_temperature(4)
+                try:
+                    self.tm_plate = self.tm_deck.load_labware(self.tm_name)
+                except:
+                    if self.tm_name=="micronic_96_wellplate_1400ul" or self.tm_name=="None" or self.tm_name=="":
+                        self.tm_name = json.loads(self.lw.micronic_96_wellplate_1400ul)
+                    self.tm_plate = self.tm_deck.load_labware_from_definition(self.tm_name)
         try:
             self.src_plates = [self.protocol.load_labware(self.src_name,slot) for slot in self.src_slots]
         except:
@@ -90,6 +102,7 @@ class RobotClass:
             liquid_trash_rack=json.loads(self.lw.amsliquidtrash)
             self.trash = [self.protocol.load_labware_from_definition(liquid_trash_rack,slot) for slot in self.trash_slots]
             self.multi_pipette.pipette.trash_container=self.trash[0]
+
 
 class PipetteClass:
     def __init__(self,pipette,status):
@@ -219,11 +232,13 @@ class RunRobot(RobotClass):
         self.robot=RobotClass(**kwarg)
         self.mp=self.robot.multi_pipette
         self.init_protocol(**kwarg)
+        self.init_tm(**kwarg)
 
     def init_protocol(self,**kwarg):
         self.init_plate(**kwarg)
         self.init_well(**kwarg)
         self.init_pipette(**kwarg)
+
 
     def init_plate(self,src_plate=1,dest_plate=1,**kwarg):
         self.current_srcplate=src_plate-1
@@ -239,6 +254,22 @@ class RunRobot(RobotClass):
         self.current_tip=start_tip-1
         self.mp.pipette.reset_tipracks()
         self.mp.pipette.starting_tip=self.robot.tips[0].rows()[0][start_tip-1]
+
+    def init_tm(self,**kwarg):
+        if "tm" in kwarg.keys():
+            if kwarg["tm"]=="src":
+                self.robot.src_plates=[self.robot.tm_plate]
+            elif kwarg["tm"]=="dest":
+                self.robot.dest_plates=[self.robot.tm_plate]
+        else:
+            pass
+
+    def set_temp(self,**kwarg):
+        if "tm_temp" in kwarg.keys():
+            self.robot.tm_deck.set_temperature(int(kwarg["tm_temp"]))
+
+    def deactivate_tm(self,**kwarg):
+        self.robot.tm_deck.deactivate()
 
     def _set_transfer(self,**kwarg):
         self.sts=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube:self.current_srctube+1]
@@ -266,7 +297,6 @@ class RunRobot(RobotClass):
             return 0
         else:
             return 1
-
 
     def _aliquot(self,target_columns=1,**kwarg):
         disps=_number_to_list(target_columns,kwarg["disp"])
@@ -328,11 +358,12 @@ class RunRobot(RobotClass):
 
     def _aliquot_p20_one_plate(self,target_columns=1,**kwarg):
         kwarg.update({"reverse_pip":1})
-        trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
-        if self._src_empty(trans_v,**kwarg):
-            self.current_srctube,self.next_srctube=self._update_one(self.current_srctube,self.next_srctube)
-            self.src_remaining_vol=self.src_vol-trans_v
         for i in range(0,target_columns):
+            trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
+            if self._src_empty(trans_v,**kwarg):
+                self.next_srctube=self.current_srctube+1
+                self.current_srctube,self.next_srctube=self._update_one(self.current_srctube,self.next_srctube)
+                self.src_remaining_vol=self.src_vol-trans_v
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
             chgTip=1 if i==target_columns-1 else 0
@@ -350,7 +381,8 @@ class RunRobot(RobotClass):
             self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
             self.current_desttube=kwarg["start_dest"]-1
 
-
+    def aliquot_n7_rp4(self,**kwarg):
+        pass
 
 
 
