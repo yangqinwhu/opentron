@@ -247,7 +247,7 @@ aliquot_p20_dtt_tm={
         "tip_slots":["7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":[],
+        "trash_slots":["9"],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["6"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
