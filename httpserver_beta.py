@@ -12,7 +12,7 @@ import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
 import ams_protocols.p200_aliquot_beta as p200_aliquot
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
-# server_ip = "192.168.1.46"
+server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
 PORT = 8000
 

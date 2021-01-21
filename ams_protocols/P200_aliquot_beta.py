@@ -49,9 +49,6 @@ def initialize_robot(**kwarg):
 def aliquot_dtt(**kwarg):
     r.aliquot_dtt_p100(**_conca_param(**kwarg))
 
-@prot_deco
-def aliquot_dtt_p20(**kwarg):
-    r.aliquot_dtt_p20(**_conca_param(**kwarg))
 
 @prot_deco
 def aliquot_lamp(**kwarg):
@@ -64,6 +61,10 @@ def sample_to_lamp(**kwarg):
 @prot_deco
 def aliquot_dtt_p20(**kwarg):
     r.aliquot_dtt_p20(**_conca_param(**kwarg))
+
+@prot_deco
+def aliquot_lamp_p20(**kwarg):
+    r.aliquot_lamp_p20(**_conca_param(**kwarg))
 
 def deactivate_tm():
     r.robot.tm_deck.deactivate()
@@ -80,6 +81,8 @@ def run(**kwarg):
         sample_to_lamp(**kwarg)
     elif kwarg["protocol"]["run"]=="aliquotDTTP20":
         aliquot_dtt_p20(**kwarg)
+    elif kwarg["protocol"]["run"]=="aliquotLampP20":
+        aliquot_lamp_p20(**kwarg)
     elif kwarg["protocol"]["run"]=="set_temp":
         set_temp()
     elif kwarg["protocol"]["run"]=="deactivate_tm":
@@ -140,7 +143,7 @@ def test_run_p100():
     aliquot_dtt(**run_param)
 
 def test_run_p20():
-    run_param_p20={
+    run_param={
         "protocol":{
         "file":"p200_aliquot",
         "run":"sampleToLamp"
@@ -150,13 +153,13 @@ def test_run_p20():
             "to_run":1,
         },
         "robot_param":{
-            "simulate":False,
+            "simulate":True,
             "deck":"sample_to_lamp_96well_n7_rp4",
-            "tm":"src",
+            "tm":"",
             "tm_temp":4,
         },
         "sample_info":{
-            "target_columns":12,
+            "target_columns":11,
             "target_plates":1,
             "samples":8,
             "sample_per_column":8,
@@ -169,9 +172,9 @@ def test_run_p20():
             "repl_chg_tip":0,
         },
         "transfer_param":{
-            "samp_vol":10,
+            "samp_vol":15,
             "reverse_vol":5,
-            "src_vol":300,
+            "src_vol":350,
             "rp4":0,
             "air_vol": 0,
             "disp":1,
@@ -189,26 +192,28 @@ def test_run_p20():
             "tip_slots":["7","8"],
             "pip_name":"p20_multi_gen2",
             "pip_location":"right",
-            "trash_slot":["9"],
+            "trash_slots":[],
             "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
             "src_slots": ["6"],
-            "dest_name": 'nest_96_wellplate_2ml_deep',
+            "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
             "dest_slots":["1","2","3","4","5"],
-            "tm_name":'nest_96_wellplate_2ml_deep',
+            "tm_name":'nest_96_wellplate_100ul_pcr_full_skirt',
             "temp_module_slot": ["10"],
         }
     }
 
     initialize_robot(**run_param)
-    aliquot_dtt_p20(**run_param)
+    aliquot_lamp_p20(**run_param)
 
-
-# test_run_p20()
-# def aliquot_lamp(**kwarg):
-#     print (f'******************** {kwarg["protocol"]["run"]} ****************')
-#     r.init_protocol(**_conca_param(**kwarg))
-#     r.aliquot_lamp_p100(**_conca_param(**kwarg))
 #
-# r.deactivate_tm()
-# r.robot.tm_deck.set_temperature(0)
-# r.robot.tm_deck.temperature
+# test_run_p20()
+# # def aliquot_lamp(**kwarg):
+# #     print (f'******************** {kwarg["protocol"]["run"]} ****************')
+# #     r.init_protocol(**_conca_param(**kwarg))
+# #     r.aliquot_lamp_p100(**_conca_param(**kwarg))
+# #
+# # r.deactivate_tm()
+# # r.robot.tm_deck.set_temperature(0)
+# # r.robot.tm_deck.temperature
+# r
+# p.trash_container

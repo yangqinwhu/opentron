@@ -7,7 +7,7 @@ import json,requests,copy
 BOTTON_FONT=16
 LABEL_FONT=8
 server_ip = "127.0.0.1"
-server_ip = "192.168.1.46"
+# server_ip = "192.168.1.46"
 
 PORT = 8000
 
@@ -75,11 +75,7 @@ sample_to_lamp_96well={
         "deck":"sample_to_lamp_96well_n7_rp4",
     },
     "sample_info":{
-        "target_columns":1,
-        "samples":8,
-        "sample_per_column":8,
-        "total_batch":1,
-        "start_batch":1,
+        "target_columns":12,
         "start_tube":1,
         "start_dest":1,
         "start_tip":1,
@@ -91,26 +87,24 @@ sample_to_lamp_96well={
         "reverse_vol":5,
         "rp4":0,
         "air_vol": 0,
-        "disp":1,
         "asp_bottom":0,
         "disp_bottom":-2,
         'mix':0,
-        "get_time":1,
         'returnTip':False,
-        "aspirate_rate": 2.5,
-        "dispense_rate": 2.5,
+        "aspirate_rate": 4,
+        "dispense_rate": 7.6,
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
     "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-        "tip_slots":["10","11"],
+        "tip_slots":["7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slot":["9"],
+        "trash_slots":["9"],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["2","4","5","6"],
+        "dest_slots":["2","4"],
     }
 }
 
@@ -126,16 +120,10 @@ aliquot_p20_96well={
     "robot_param":{
         "simulate":True,
         "deck":"sample_to_lamp_96well_n7_rp4",
-        "tm":"src",
-        "tm_temp":4,
     },
     "sample_info":{
         "target_columns":12,
         "target_plates":1,
-        "samples":8,
-        "sample_per_column":8,
-        "total_batch":1,
-        "start_batch":1,
         "start_tube":1,
         "start_dest":1,
         "start_tip":1,
@@ -148,11 +136,9 @@ aliquot_p20_96well={
         "src_vol":150,
         "rp4":0,
         "air_vol": 0,
-        "disp":1,
         "asp_bottom":0,
         "disp_bottom":-2,
         'mix':0,
-        "get_time":1,
         'returnTip':False,
         "aspirate_rate": 2.5,
         "dispense_rate": 2.5,
@@ -168,11 +154,8 @@ aliquot_p20_96well={
         "src_slots": ["7"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
         "dest_slots":["2","4","5","6"],
-        "tm_name":'',
-        "temp_module_slot": ["1"],
     }
 }
-
 
 aliquot_p100_96well={
     "protocol":{
@@ -190,8 +173,6 @@ aliquot_p100_96well={
     "sample_info":{
         "target_columns":2,
         "target_plates":1,
-        "total_batch":1,
-        "start_batch":1,
         "start_tube":1,
         "start_dest":1,
         "src_plate":1,
@@ -208,7 +189,6 @@ aliquot_p100_96well={
         "asp_bottom":-3,
         "disp_bottom":-11,
         'mix':0,
-        "get_time":1,
         'returnTip':False,
         "aspirate_rate": 60,
         "dispense_rate": 20,
@@ -238,21 +218,15 @@ aliquot_p20_dtt_tm={
     },
     "robot_param":{
         "simulate":False,
-        "deck":"sample_to_lamp_96well_n7_rp4",
         "tm":"src",
         "tm_temp":4,
     },
     "sample_info":{
         "target_columns":12,
         "target_plates":1,
-        "samples":8,
-        "sample_per_column":8,
-        "total_batch":1,
-        "start_batch":1,
         "start_tube":1,
         "start_dest":1,
         "start_tip":2,
-        "replicates":2,
         "repl_chg_tip":0,
     },
     "transfer_param":{
@@ -260,12 +234,9 @@ aliquot_p20_dtt_tm={
         "reverse_vol":5,
         "src_vol":300,
         "rp4":0,
-        "air_vol": 0,
-        "disp":1,
         "asp_bottom":11,
         "disp_bottom":0,
-        'mix':0,
-        "get_time":1,
+        "disp":1,
         'returnTip':False,
         "aspirate_rate": 7.6,
         "dispense_rate": 7.6,
@@ -276,15 +247,67 @@ aliquot_p20_dtt_tm={
         "tip_slots":["7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slot":["9"],
+        "trash_slots":[],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["6"],
-        "dest_name": 'nest_96_wellplate_2ml_deep',
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
         "dest_slots":["1","2","3","4","5"],
         "tm_name":'nest_96_wellplate_2ml_deep',
         "temp_module_slot": ["10"],
     }
 }
+
+aliquot_p20_lamp_tm={
+    "protocol":{
+    "file":"p200_aliquot",
+    "run":"aliquotDTTP20"
+    },
+    "robot_status":{
+        "initialized":0,
+        "to_run":1,
+    },
+    "robot_param":{
+        "simulate":False,
+        "tm":"src",
+        "tm_temp":4,
+    },
+    "sample_info":{
+        "target_columns":11,
+        "target_plates":1,
+        "n7_wells":"3,5",
+        "rp4_wells":"7,9",
+        "start_dest":1,
+        "start_tip":1,
+        "repl_chg_tip":0,
+    },
+    "transfer_param":{
+        "samp_vol":15,
+        "reverse_vol":3,
+        "src_vol":350,
+        "asp_bottom":11,
+        "disp_bottom":0.5,
+        "disp":1,
+        'returnTip':False,
+        "aspirate_rate": 7.6,
+        "dispense_rate": 7.6,
+        "tip_press_increment":0.3,
+        "tip_presses" : 1,
+    },
+    "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
+        "tip_slots":["7","8"],
+        "pip_name":"p20_multi_gen2",
+        "pip_location":"right",
+        "trash_slots":[],
+        "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
+        "src_slots": ["6"],
+        "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
+        "dest_slots":["1","2"],
+        "tm_name":'nest_96_wellplate_2ml_deep',
+        "temp_module_slot": ["10"],
+    }
+}
+
+
 
 class OpentronApp(tk.Tk):
     def __init__(self):
@@ -326,7 +349,7 @@ class HomePage(tk.Frame):
             x=420,y=40,height=150,width=360)
         tk.Button(self,text='Aliquot DTT \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
             x=20,y=210,height=150,width=360)
-        tk.Button(self,text='Aliquot LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
+        tk.Button(self,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
             x=420,y=210,height=150,width=360)
         tk.Button(self,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
             x=340,y=380,height=50,width=120)
@@ -452,12 +475,14 @@ class RunPage(tk.Frame):
         self.back_btn=tk.Button(master,text='Back',font=('Arial',BOTTON_FONT),command=self.goToHome)
         self.back_btn.grid(
             row=15, column=0,rowspan=2, sticky="we")
-        self.tm_temp_btn=tk.Button(master,text='TM ON',font=('Arial',BOTTON_FONT),command=self.set_temp)
-        self.tm_temp_btn.grid(
-            row=18, column=0,rowspan=2, sticky="we")
-        self.tm_deactivate_btn=tk.Button(master,text='TM OFF',font=('Arial',BOTTON_FONT),command=self.deactivate_tm)
-        self.tm_deactivate_btn.grid(
-            row=21, column=0,rowspan=2, sticky="we")
+        if "tm" in self.defaultParams["robot_param"].keys():
+            if len(self.defaultParams["robot_param"]["tm"])>0:
+                self.tm_temp_btn=tk.Button(master,text='TM ON',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.set_temp)
+                self.tm_temp_btn.grid(
+                    row=18, column=0,rowspan=2, sticky="we")
+                self.tm_deactivate_btn=tk.Button(master,text='TM OFF',font=('Arial',BOTTON_FONT),state=tk.DISABLED,command=self.deactivate_tm)
+                self.tm_deactivate_btn.grid(
+                    row=21, column=0,rowspan=2, sticky="we")
 
         for i in range(7):
             tk.Label(master, text="",font=('Arial',LABEL_FONT-10)).grid(row=(i*3+2), column=0,sticky="e")
@@ -488,8 +513,14 @@ class RunPage(tk.Frame):
     def config_side_buttons(self):
         if self.initialized:
             self.run_btn.config(state=tk.NORMAL)
+            if hasattr(self,"tm_temp_btn"):
+                self.tm_temp_btn.config(state=tk.NORMAL)
+                self.tm_deactivate_btn.config(state=tk.NORMAL)
         else:
             self.run_btn.config(state=tk.DISABLED)
+            if hasattr(self,"tm_temp_btn"):
+                self.tm_temp_btn.config(state=tk.DISABLED)
+                self.tm_deactivate_btn.config(state=tk.DISABLED)
 
     def showPage(self):
         self.tkraise()
@@ -626,9 +657,9 @@ class LAMPPage(RunPage):
 
 class AliquotDTTPage(RunPage):
     # config="aliquotDTT_p100"
-    config="aliquotDTTP20"
+    config="aliquotDTTP20_tm"
     pp=f".{config}.configure"
-    basic=["target_columns","target_plates","start_tip","start_tube","src_vol"]
+    basic=["target_columns","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -636,15 +667,15 @@ class AliquotDTTPage(RunPage):
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
 class AliquotLAMPPage(RunPage):
-    config="aliquotLamp_p100"
+    config="aliquotLampP20_tm"
     # config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
-    basic=["target_columns","target_plates","start_tip","start_tube","src_vol"]
+    basic=["target_columns","start_tip","lamp_wells","src_vol"]
     pp=f".{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
         # defaultParams=json.loads(json.dumps(aliquot_p100_96well))
-        defaultParams=json.loads(json.dumps(aliquot_p20_96well))
+        defaultParams=json.loads(json.dumps(aliquot_p20_lamp_tm))
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
 

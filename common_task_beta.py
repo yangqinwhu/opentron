@@ -141,12 +141,13 @@ class PipetteClass:
             return n_r_w , n_c_w
 
         for i in range(0,disp):
-            status="current dispensing well is {}".format(well)
+            # status="current dispensing well is {}".format(well)
+            status = "Dispense {:.1f} uL to {}".format(volume,well)
             print (status)
             self.pipette.dispense(volume, well.bottom(disp_bottom))
             well = _next_well(well)[1]
 
-    def p_transfer(self,s,d, b = 0,samp_vol= 50,air_vol = 25,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=1,asp_bottom=2,disp_bottom=3,blowout = False,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0,simulate=False,**kwarg):
+    def p_transfer(self,s,d, b = 0,samp_vol= 50,air_vol = 0,mix=0, buffer_vol = 0,returnTip = False,chgTip=True,get_time = 1,disp=1,asp_bottom=2,disp_bottom=3,blowout = False,tip_presses = 1,tip_press_increment=0.3,reverse_vol=0,reverse_pip=0,simulate=False,**kwarg):
         """ s: source well  d: destination well b: buffer well.
         dispense: how many times the same to be dispensed
         Transfer from source well: s to destination well"""
@@ -186,13 +187,13 @@ class PipetteClass:
         status = "Aspirate {:.1f} uL from {}".format(asp_vol,s)
         print (status)
         self.pipette.air_gap(air_vol)
-        self._log_time(st,event = 'Aspirate saliva') if get_time else 1
+        self._log_time(st,event = 'Aspirate') if get_time else 1
         st = timeit.default_timer() if get_time else 1
 
         self.p_dispense(d,air_vol) if air_vol >0 else 1
         self.p_dispense(d,samp_vol,disp=disp,disp_bottom=disp_bottom)
-        status = "Dispense {:.1f} uL from {}".format(samp_vol,s)
-        print (status)
+        # status = "Dispense {:.1f} uL to {}".format(samp_vol,d)
+        # print (status)
         if blowout:
             self.pipette.blow_out()
         self._log_time(st,event = 'Dispense saliva') if get_time else 1
@@ -212,9 +213,10 @@ class PipetteClass:
                 self.pipette.return_tip()
                 st = timeit.default_timer() if get_time else st
             else:
-                self.pipette.drop_tip(home_after=False,)
-                self.pipette.home()
-                print ("Tip changed")
+                # self.pipette.drop_tip(home_after=False,)
+                # self.pipette.home()
+                self.pipette.drop_tip()
+                print (f"Tip dropped to {self.pipette.trash_container}")
                 self._log_time(st,event = 'Drop tip') if get_time else 1
                 st = timeit.default_timer() if get_time else st
 
@@ -353,16 +355,15 @@ class RunRobot(RobotClass):
             if rp4:
                 d=self.robot.dest_plates[self.current_destplate+1].rows()[0][self.current_desttube]
                 self.mp.p_transfer(s,d,**kwarg)
-            self.next_desttube=self.current_desttube+1
-            self.current_desttube,self.next_desttube=self._update_one(self.current_desttube,self.next_desttube)
+            self.current_desttube+=1
+            self.current_srctube+=1
 
     def _aliquot_p20_one_plate(self,target_columns=1,**kwarg):
         kwarg.update({"reverse_pip":1})
         for i in range(0,target_columns):
             trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
             if self._src_empty(trans_v,**kwarg):
-                self.next_srctube=self.current_srctube+1
-                self.current_srctube,self.next_srctube=self._update_one(self.current_srctube,self.next_srctube)
+                self.current_srctube+=1
                 self.src_remaining_vol=self.src_vol-trans_v
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
@@ -370,22 +371,47 @@ class RunRobot(RobotClass):
             kwarg.update({"chgTip":chgTip})
             self.mp.p_transfer(s,d,**kwarg)
             kwarg.update({"reverse_pip":0})
-            self.next_desttube=self.current_desttube+1
-            self.current_desttube,self.next_desttube=self._update_one(self.current_desttube,self.next_desttube)
+            self.current_desttube+=1
 
     def aliquot_dtt_p20(self,target_plates=1,**kwarg):
         self.src_vol=kwarg["src_vol"]
         self.src_remaining_vol=self.src_vol
         for p in range(0,target_plates):
             self._aliquot_p20_one_plate(**kwarg)
-            self.current_destplate,self.next_destplate=self._update_one(self.current_destplate,self.next_destplate)
+            self.current_destplate+=1
             self.current_desttube=kwarg["start_dest"]-1
 
-    def aliquot_n7_rp4(self,**kwarg):
-        pass
+    def _one_lamp_plate(self,well_list=[3,5],**kwarg):
+        self.src_vol=kwarg["src_vol"]
+        self.src_remaining_vol=self.src_vol
+        self.current_srctube = well_list[0]-1
+        self.current_desttube=0
+        self._aliquot_p20_one_plate(**kwarg)
+        self.src_vol=kwarg["src_vol"]
+        self.src_remaining_vol=self.src_vol
+        self.current_srctube = well_list[1]-1
+        self.current_desttube=11
+        kwarg["target_columns"]=1
+        self._aliquot_p20_one_plate(**kwarg)
+
+    def aliquot_lamp_p20(self,n7_wells="3,5",rp4_wells="7,9",**kwarg):
+        """It takes ource well position +1  string "n7, n7_nbc" as input
+        All 4 source wells need to be on the same plate
+        if rp4 position <1, then it will not aliquot rp4"""
+        n7_l=[int(i) for i in n7_wells.split(",")]
+        self._one_lamp_plate(n7_l,**kwarg)
+        rp4_l=[int(i) for i in rp4_wells.split(",")]
+        if rp4_l[0]>0:
+            self.current_destplate+=1
+            self._one_lamp_plate(rp4_l,**kwarg)
 
 
 
+# lamp_wells="3579"
+# a=[int(i) for i in lamp_wells.split(",")]
+#
+#
+# a
 
 #
 # r=RunRobot()
