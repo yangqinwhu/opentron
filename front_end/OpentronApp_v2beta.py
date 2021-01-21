@@ -459,8 +459,8 @@ class RunPage(tk.Frame):
         self.tm_deactivate_btn.grid(
             row=21, column=0,rowspan=2, sticky="we")
 
-        # for i in range(7):
-        #     tk.Label(master, text="",font=('Arial',LABEL_FONT)).grid(row=(i*3+2), column=0,sticky="e")
+        for i in range(7):
+            tk.Label(master, text="",font=('Arial',LABEL_FONT)).grid(row=(i*3+2), column=0,sticky="e")
 
     def _get_deck(self):
         deck={}
