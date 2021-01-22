@@ -1,19 +1,14 @@
 #http server
-"""
-Note:If you need to control gpios, first stop the robot server with systemctl stop opentrons-robot-server.
-Until you restart the server with systemctl start opentrons-robot-server, you will be unable to control the robot using the Opentrons app.
-"""
 import socketserver
 from http.server import BaseHTTPRequestHandler,HTTPServer
-
 from threading import Thread
 import sys,json,time
-# import ams_protocols.saliva_to_dtt as saliva_to_dtt
-# import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
-import ams_protocols.p200_aliquot as p200_aliquot
+import ams_protocols.saliva_to_dtt as saliva_to_dtt
+import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
+# import ams_protocols.p200_aliquot_beta as p200_aliquot
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
-server_ip = "192.168.1.46"
+# server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
 PORT = 8000
 
@@ -157,15 +152,22 @@ class RunRobot:
     def sele(self,name):
         self.prot = name
     def initialize(self,jsondata):
-        if jsondata["protocol"]["file"]=="p200_aliquot":
-            self.prot=p200_aliquot
+        if jsondata["protocol"]=="saliva_to_dtt":
+            self.prot=saliva_to_dtt
+            # self.sele('saliva_to_dtt')
+        elif jsondata["protocol"]=="sample_to_lamp_96well":
+            # self.sele('sample_to_lamp_96well')
+            self.prot=sample_to_lamp_96well
+        # elif jsondata["protocol"]=="p200_aliquot":
+        #     # self.sele('sample_to_lamp_96well')
+        #     self.prot=p200_aliquot
         if not jsondata["robot_status"]["initialized"]:
-            self.prot.initialize_robot(**jsondata)
+            self.deck_plan=self.prot.initialize_robot(**jsondata["robot_param"])
             print ("opentron initialized")
             self.status = "Robot Initialized"
     def run(self,jsondata):
         if jsondata["robot_status"]["to_run"]:
-            self.prot.run(**jsondata)
+            self.prot.run(**jsondata["sample_info"],**jsondata["transfer_param"])
             self.status = "Run finished"
     def pause(self):
         self.prot.pause_robot()

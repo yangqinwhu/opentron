@@ -353,6 +353,7 @@ class RunRobot(RobotClass):
             self.current_desttube=kwarg["start_dest"]-1
 
     def sample_to_lamp(self,target_columns=1,rp4=0,**kwarg):
+        kwarg.update({"reverse_pip":1})
         for i in range(0,target_columns):
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
@@ -362,7 +363,7 @@ class RunRobot(RobotClass):
                 self.mp.p_transfer(s,d,**kwarg)
             self.current_desttube+=1
             self.current_srctube+=1
-        if target_columns<11:    
+        if target_columns<12:
             s=self.robot.src_plates[self.current_srcplate].rows()[0][11]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
             self.mp.p_transfer(s,d,**kwarg)
@@ -385,13 +386,38 @@ class RunRobot(RobotClass):
             kwarg.update({"reverse_pip":0})
             self.current_desttube+=1
 
+    def _one_dtt_plate(self,target_columns=1,**kwarg):
+        kwarg.update({"reverse_pip":1})
+        for i in range(0,target_columns):
+            trans_v=(kwarg["disp"]*kwarg["samp_vol"])+(kwarg["reverse_pip"]*kwarg["reverse_vol"])
+            if self._src_empty(trans_v,**kwarg):
+                self.current_srctube+=1
+                self.src_remaining_vol=self.src_vol-trans_v
+            s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
+            d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
+            chgTip=0
+            kwarg.update({"chgTip":chgTip})
+            self.mp.p_transfer(s,d,**kwarg)
+            kwarg.update({"reverse_pip":0})
+            self.current_desttube+=1
+        if target_columns==12:
+            self.mp.drop_tip()
+        else:
+            s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
+            d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
+            chgTip=1
+            kwarg.update({"chgTip":chgTip})
+            self.mp.p_transfer(s,d,**kwarg)
+
+
     def aliquot_dtt_p20(self,target_plates=1,**kwarg):
         self.src_vol=kwarg["src_vol"]
         self.src_remaining_vol=self.src_vol
         for p in range(0,target_plates):
-            self._aliquot_p20_one_plate(**kwarg)
+            self._one_dtt_plate(**kwarg)
             self.current_destplate+=1
             self.current_desttube=kwarg["start_dest"]-1
+
 
     def _one_lamp_plate(self,well_list=[3,5],**kwarg):
         self.src_vol=kwarg["src_vol"]
