@@ -85,7 +85,7 @@ sample_to_lamp_96well={
     "transfer_param":{
         "samp_vol":5,
         "reverse_vol":5,
-        "rp4":0,
+        "rp4":1,
         "air_vol": 0,
         "asp_bottom":1,
         "disp_bottom":0.5,
@@ -234,7 +234,7 @@ aliquot_p20_dtt_tm={
         "reverse_vol":5,
         "src_vol":300,
         "rp4":0,
-        "asp_bottom":11,
+        "asp_bottom":12,
         "disp_bottom":0,
         "disp":1,
         'returnTip':False,
@@ -284,7 +284,7 @@ aliquot_p20_lamp_tm={
         "samp_vol":15,
         "reverse_vol":3,
         "src_vol":350,
-        "asp_bottom":11,
+        "asp_bottom":12,
         "disp_bottom":0.5,
         "disp":1,
         'returnTip':False,
@@ -297,11 +297,11 @@ aliquot_p20_lamp_tm={
         "tip_slots":["7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":[],
+        "trash_slots":["9"],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["6"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["1","2"],
+        "dest_slots":["2","4"],
         "tm_name":'nest_96_wellplate_2ml_deep',
         "temp_module_slot": ["10"],
     }
@@ -616,7 +616,7 @@ class RunPage(tk.Frame):
     def save_run_params(self):
         para=self.get_run_params()
         self.defaultParams=copy.deepcopy(para)
-        pp=f".{self.config}.configure"
+        pp=Path(__file__).parent / "defaultRunParam"/ f"{self.config}.configure"
         with open(pp, 'wt') as f:
             json.dump(para, f, indent=2)
         f.close()
@@ -636,7 +636,7 @@ class RunPage(tk.Frame):
 
 class DTTPage(RunPage):
     config="saliva_to_dtt"
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -646,8 +646,8 @@ class DTTPage(RunPage):
 
 class LAMPPage(RunPage):
     config="sampleToLamp_96well"
-    pp=f".{config}.configure"
-    basic=["target_columns","rp4","start_tip","start_tube"]
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
+    basic=["target_columns","rp4","start_tip"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -658,7 +658,7 @@ class LAMPPage(RunPage):
 class AliquotDTTPage(RunPage):
     # config="aliquotDTT_p100"
     config="aliquotDTTP20_tm"
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     basic=["target_columns","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
@@ -670,7 +670,7 @@ class AliquotLAMPPage(RunPage):
     config="aliquotLampP20_tm"
     # config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
     basic=["target_columns","start_tip","lamp_wells","src_vol"]
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:

@@ -1,0 +1,62 @@
+{
+  "protocol": {
+    "file": "p200_aliquot",
+    "run": "aliquotLampP20"
+  },
+  "robot_status": {
+    "initialized": 0,
+    "to_run": 1
+  },
+  "robot_param": {
+    "simulate": 0,
+    "tm": "src",
+    "tm_temp": 4
+  },
+  "sample_info": {
+    "target_columns": 3,
+    "target_plates": 1,
+    "n7_wells": "3,5",
+    "rp4_wells": "7,9",
+    "start_dest": 1,
+    "start_tip": 1,
+    "repl_chg_tip": 0
+  },
+  "transfer_param": {
+    "samp_vol": 15,
+    "reverse_vol": 3,
+    "src_vol": 350,
+    "asp_bottom": 12,
+    "disp_bottom": 0.5,
+    "disp": 1,
+    "returnTip": 0,
+    "aspirate_rate": 7.6,
+    "dispense_rate": 7.6,
+    "tip_press_increment": 0.3,
+    "tip_presses": 1
+  },
+  "deck_param": {
+    "tip_name": "opentrons_96_filtertiprack_20ul",
+    "tip_slots": [
+      "7",
+      "8"
+    ],
+    "pip_name": "p20_multi_gen2",
+    "pip_location": "right",
+    "trash_slots": [
+      "9"
+    ],
+    "src_name": "nest_96_wellplate_100ul_pcr_full_skirt",
+    "src_slots": [
+      "6"
+    ],
+    "dest_name": "nest_96_wellplate_100ul_pcr_full_skirt",
+    "dest_slots": [
+      "2",
+      "4"
+    ],
+    "tm_name": "nest_96_wellplate_2ml_deep",
+    "temp_module_slot": [
+      "10"
+    ]
+  }
+}

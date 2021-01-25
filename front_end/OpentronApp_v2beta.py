@@ -1,5 +1,6 @@
-import os
+import os,time
 from pathlib import Path
+from threading import Thread
 import tkinter as tk
 # import shutil
 import json,requests,copy
@@ -8,6 +9,8 @@ BOTTON_FONT=16
 LABEL_FONT=8
 server_ip = "127.0.0.1"
 server_ip = "192.168.1.46"
+DEV=True if server_ip == "127.0.0.1" else False
+
 
 PORT = 8000
 
@@ -226,7 +229,7 @@ aliquot_p20_dtt_tm={
         "target_plates":1,
         "start_tube":1,
         "start_dest":1,
-        "start_tip":2,
+        "start_tip":1,
         "repl_chg_tip":0,
     },
     "transfer_param":{
@@ -234,7 +237,7 @@ aliquot_p20_dtt_tm={
         "reverse_vol":5,
         "src_vol":300,
         "rp4":0,
-        "asp_bottom":11,
+        "asp_bottom":12,
         "disp_bottom":0,
         "disp":1,
         'returnTip':False,
@@ -251,7 +254,7 @@ aliquot_p20_dtt_tm={
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["6"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["1","2","3","4","5"],
+        "dest_slots":["2","4"],
         "tm_name":'nest_96_wellplate_2ml_deep',
         "temp_module_slot": ["10"],
     }
@@ -260,7 +263,7 @@ aliquot_p20_dtt_tm={
 aliquot_p20_lamp_tm={
     "protocol":{
     "file":"p200_aliquot",
-    "run":"aliquotDTTP20"
+    "run":"aliquotLampP20"
     },
     "robot_status":{
         "initialized":0,
@@ -284,7 +287,7 @@ aliquot_p20_lamp_tm={
         "samp_vol":15,
         "reverse_vol":3,
         "src_vol":350,
-        "asp_bottom":11,
+        "asp_bottom":12,
         "disp_bottom":0.5,
         "disp":1,
         'returnTip':False,
@@ -297,16 +300,15 @@ aliquot_p20_lamp_tm={
         "tip_slots":["7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":[],
+        "trash_slots":["9"],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["6"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["1","2"],
+        "dest_slots":["2","4"],
         "tm_name":'nest_96_wellplate_2ml_deep',
         "temp_module_slot": ["10"],
     }
 }
-
 
 
 class OpentronApp(tk.Tk):
@@ -368,7 +370,6 @@ class RunPage(tk.Frame):
         self.master = master
         self.parent=parent
         self.robot_url=f"http://{server_ip}:{PORT}"
-        # self.robot_url="http://127.0.0.1:8000"
         self.forms=["robot_param","sample_info","transfer_param"]
         self.initialized=0
         self.create_frames()
@@ -376,8 +377,8 @@ class RunPage(tk.Frame):
         self.config_side_buttons()
 
     def create_frames(self):
-        self.Frame1 = tk.Frame(self)  # Frame 1 is the side button
-        self.Frame1.place(x=0,y=0,height=400,width=150)
+        self.SideFrame = tk.Frame(self)  # Frame 1 is the side button
+        self.SideFrame.place(x=0,y=0,height=400,width=150)
         self.BottomFrame = tk.Frame(self)
         self.BottomFrame.place(x=150,y=350,height=50,width=450) # Frame 2 is the bottom button
         self.FormFrame = tk.Frame(self) # param is the parameter region
@@ -386,14 +387,18 @@ class RunPage(tk.Frame):
         self.frm_txt = tk.Text(self)
         self.frm_txt.place(
             x=600,y=20,height=360,width=200)
+        self.StatusFrame=tk.Frame(self)
+        self.StatusFrame.place(x=0,y=400,height=60,width=150)
 
     def create_widgets(self):
         ### botton control area
         self.create_side_buttons()
         self.create_bottom_buttons()
+        self.create_status_view()
         ### Input area
         self.create_forms(self.defaultParams,basic=True)
         self.create_deck_btn()
+
 
     def _create_form(self,dic,master):
         for idx, text in enumerate(dic.keys()):
@@ -437,7 +442,7 @@ class RunPage(tk.Frame):
                     var.set(i)
                     self.run_params[form][k]=var
             if len(self.run_params[form])>0:
-                tk.Label(master, text = form,font=('Arial',LABEL_FONT+2)).grid(
+                tk.Label(master,text=form,font=('Arial',LABEL_FONT+2)).grid(
                     row=self.form_row, column=self.form_column,columnspan=2, sticky="ew")
                 self.form_row+=1
                 self._create_form(self.run_params[form],master)
@@ -456,7 +461,7 @@ class RunPage(tk.Frame):
         self.basic_btn.grid(row=0, column=0,  columnspan=1,sticky="w")
 
     def create_side_buttons(self):
-        master = self.Frame1
+        master = self.SideFrame
         self.qrun_btn=tk.Button(master,text='Quick Run',font=('Arial',BOTTON_FONT),command=self.quick_run)
         self.qrun_btn.grid(
             row=0, column=0,rowspan=2, sticky="we")
@@ -486,6 +491,23 @@ class RunPage(tk.Frame):
 
         for i in range(7):
             tk.Label(master, text="",font=('Arial',LABEL_FONT-10)).grid(row=(i*3+2), column=0,sticky="e")
+
+    def create_status_view(self):
+        master=self.StatusFrame
+        self.robot_status = tk.StringVar()
+        self.robot_status.set("Unknown")
+        tk.Label(master, textvariable=self.robot_status,font=('Arial',BOTTON_FONT-1),relief="sunken").grid(
+            row=0, column=0, columnspan=1,sticky="ewsn")
+
+    def update_status_view(self):
+        self.get_status=True
+        if not hasattr(self,"r_status_thread"):
+            self.r_status_thread=Thread(target=self.get_run_status)
+            self.r_status_thread.start()
+        else:
+            if not self.r_status_thread.is_alive():
+                self.r_status_thread=Thread(target=self.get_run_status)
+                self.r_status_thread.start()
 
     def _get_deck(self):
         deck={}
@@ -521,6 +543,23 @@ class RunPage(tk.Frame):
             if hasattr(self,"tm_temp_btn"):
                 self.tm_temp_btn.config(state=tk.DISABLED)
                 self.tm_deactivate_btn.config(state=tk.DISABLED)
+        if self.robot_status.get()=="BUSY":
+            self.run_btn.config(state=tk.DISABLED)
+            self.qrun_btn.config(state=tk.DISABLED)
+            self.home_btn.config(state=tk.DISABLED)
+            self.back_btn.config(state=tk.DISABLED)
+        elif self.robot_status.get()=="IDLE":
+            if self.initialized:
+                self.run_btn.config(state=tk.NORMAL)
+        elif self.robot_status.get()=="Robot Error":
+            self.initialized=0
+            self.run_btn.config(state=tk.DISABLED)
+        if self.robot_status.get()!="BUSY":
+            self.qrun_btn.config(state=tk.NORMAL)
+            self.home_btn.config(state=tk.NORMAL)
+            self.back_btn.config(state=tk.NORMAL)
+
+
 
     def showPage(self):
         self.tkraise()
@@ -530,11 +569,14 @@ class RunPage(tk.Frame):
         self.master.showPage('HomePage')
         self.initialized=0
         self.config_side_buttons()
+        self.get_status=False
+        self.robot_status.set("Unknown")
 
     def init_robot(self):
+        self.update_status_view()
         url=self.robot_url+'/init_robot'
         res=requests.get(url,json=self.get_run_params())
-        self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+        self.frm_txt.insert(tk.END,"\n"+"*"*10+"\n")
         self.frm_txt.insert(tk.END,res.text)
         self.initialized=1
         self.config_side_buttons()
@@ -544,11 +586,11 @@ class RunPage(tk.Frame):
             url=self.robot_url+'/run_robot'
             # js=json.dumps(self.get_run_params())
             res=requests.get(url,json=self.get_run_params())
-            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+            self.frm_txt.insert(tk.END,"\n"+"*"*10+"\n")
             self.frm_txt.insert(tk.END,res.text)
             self.frm_txt.see(tk.END)
         else:
-            self.frm_txt.insert(tk.END,"\n"+"*"*40+"\n")
+            self.frm_txt.insert(tk.END,"\n"+"*"*10+"\n")
             self.frm_txt.insert(tk.END,"Initialize the robot first")
             self.frm_txt.see(tk.END)
 
@@ -592,6 +634,25 @@ class RunPage(tk.Frame):
         }
         res=requests.get(url,json=set_temp)
 
+    def get_run_status(self):
+        while self.get_status:
+            sleep_time=2 if DEV else 5
+            time.sleep(sleep_time)
+            try:
+                url=self.robot_url+'/get_status'
+                res=requests.get(url,json={})
+                self.frm_txt.insert(tk.END,f"{res.text}\n")
+                self.frm_txt.see(tk.END)
+                self.robot_status.set(res.text)
+            except Exception as e:
+                st="No Server"
+                self.frm_txt.insert(tk.END,f"{st}\n")
+                self.frm_txt.see(tk.END)
+                self.robot_status.set(st)
+                self.initialized=0
+            self.config_side_buttons()
+
+
     def get_run_params(self):
         para = {}
         for f in self.defaultParams.keys():
@@ -616,7 +677,7 @@ class RunPage(tk.Frame):
     def save_run_params(self):
         para=self.get_run_params()
         self.defaultParams=copy.deepcopy(para)
-        pp=f".{self.config}.configure"
+        pp=Path(__file__).parent / "defaultRunParam"/ f"{self.config}.configure"
         with open(pp, 'wt') as f:
             json.dump(para, f, indent=2)
         f.close()
@@ -634,9 +695,10 @@ class RunPage(tk.Frame):
         self.adv_btn.config(state=tk.NORMAL)
         self.create_deck_btn()
 
+
 class DTTPage(RunPage):
     config="saliva_to_dtt"
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -646,7 +708,7 @@ class DTTPage(RunPage):
 
 class LAMPPage(RunPage):
     config="sampleToLamp_96well"
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     basic=["target_columns","rp4","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
@@ -658,7 +720,7 @@ class LAMPPage(RunPage):
 class AliquotDTTPage(RunPage):
     # config="aliquotDTT_p100"
     config="aliquotDTTP20_tm"
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     basic=["target_columns","start_tip","start_tube"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
@@ -670,7 +732,7 @@ class AliquotLAMPPage(RunPage):
     config="aliquotLampP20_tm"
     # config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
     basic=["target_columns","start_tip","lamp_wells","src_vol"]
-    pp=f".{config}.configure"
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:

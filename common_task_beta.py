@@ -40,6 +40,7 @@ class RobotClass:
         if simulate:
             import opentrons.simulate
             self.protocol = opentrons.simulate.get_protocol_api('2.1')
+            time.sleep(5)
         else:
             import opentrons.execute # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
             self.protocol = opentrons.execute.get_protocol_api('2.7')
@@ -117,6 +118,7 @@ class PipetteClass:
         run_time = run_time/60 if unit == "min" else run_time
         log ='{} takes {:.2} {}'.format(event,run_time,unit)
         self.status.set_status(log)
+        # time.sleep(1)
 
     def set_p_param(self,**kwarg):
         self.p_param=kwarg
@@ -401,7 +403,7 @@ class RunRobot(RobotClass):
             kwarg.update({"reverse_pip":0})
             self.current_desttube+=1
         if target_columns==12:
-            self.mp.drop_tip()
+            self.mp.pipette.drop_tip()
         else:
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][11]

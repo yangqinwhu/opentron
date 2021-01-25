@@ -1,0 +1,58 @@
+{
+  "protocol": {
+    "file": "p200_aliquot",
+    "run": "sampleToLamp"
+  },
+  "robot_status": {
+    "initialized": 0,
+    "to_run": 1
+  },
+  "robot_param": {
+    "simulate": false,
+    "deck": "sample_to_lamp_96well_n7_rp4"
+  },
+  "sample_info": {
+    "target_columns": 3,
+    "start_tube": 1,
+    "start_dest": 1,
+    "start_tip": 1,
+    "replicates": 2,
+    "repl_chg_tip": 0
+  },
+  "transfer_param": {
+    "samp_vol": 5,
+    "reverse_vol": 5,
+    "rp4": 1,
+    "air_vol": 0,
+    "asp_bottom": 1,
+    "disp_bottom": 0.5,
+    "mix": 0,
+    "returnTip": false,
+    "aspirate_rate": 4,
+    "dispense_rate": 7.6,
+    "tip_press_increment": 0.3,
+    "tip_presses": 1
+  },
+  "deck_param": {
+    "tip_name": "opentrons_96_filtertiprack_20ul",
+    "tip_slots": [
+      "7",
+      "8",
+      "11"
+    ],
+    "pip_name": "p20_multi_gen2",
+    "pip_location": "right",
+    "trash_slots": [
+      "9"
+    ],
+    "src_name": "nest_96_wellplate_100ul_pcr_full_skirt",
+    "src_slots": [
+      "1"
+    ],
+    "dest_name": "nest_96_wellplate_100ul_pcr_full_skirt",
+    "dest_slots": [
+      "2",
+      "4"
+    ]
+  }
+}

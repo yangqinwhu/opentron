@@ -401,7 +401,7 @@ class RunRobot(RobotClass):
             kwarg.update({"reverse_pip":0})
             self.current_desttube+=1
         if target_columns==12:
-            self.mp.drop_tip()
+            self.mp.pipette.drop_tip()
         else:
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][11]

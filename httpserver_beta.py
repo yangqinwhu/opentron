@@ -8,14 +8,18 @@ from http.server import BaseHTTPRequestHandler,HTTPServer
 
 from threading import Thread
 import sys,json,time
-import ams_protocols.saliva_to_dtt as saliva_to_dtt
-import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
+# import ams_protocols.saliva_to_dtt as saliva_to_dtt
+# import ams_protocols.sample_to_lamp_96well as sample_to_lamp_96well
 import ams_protocols.p200_aliquot_beta as p200_aliquot
 # sys.path.append("/var/lib/jupyter/notebooks")
 sys.path.append("/Users/chunxiao/Dropbox/python/aptitude_project/opentron")
-server_ip = "192.168.1.46"
+# server_ip = "192.168.1.46"
 server_ip = "127.0.0.1"
 PORT = 8000
+DEV=True if server_ip == "127.0.0.1" else False
+# Status_reset_t
+
+
 
 
 class DispatchMeta(type):
@@ -80,20 +84,19 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         try:
             # redirect / to /index
             path = self.path.strip('/') or 'index'
-            print(path)
             if path =="init_robot":
                 self.init_robot()
-                self.sendData(f"Robot initializing\n {str(self.robot.deck_plan)} ",'text/html')
+                self.sendData(f"*** Robot initializing *** \n",'text/html')
                 # self.sendMAP(json.dumps(self.robot.deck_plan))
             elif path =="run_robot":
                 self.run_robot()
-                self.sendData("Run started",'text/html')
+                self.sendData("*** Run started *** \n",'text/html')
             elif path =="pause":
                 self.pause_robot()
-                self.sendData("Run paused",'text/html')
+                self.sendData("*** Run paused *** \n",'text/html')
             elif path =="resume":
                 self.pause_robot()
-                self.sendData("Run paused",'text/html')
+                self.sendData("*** Run paused *** \n",'text/html')
             elif path=="get_status":
                 self.get_status()
         except:
@@ -144,7 +147,7 @@ class SimpleHandler(BaseHTTPRequestHandler,):
         self.Q.put(jsondata)
 
     def get_status(self):
-        self.send_response(200)
+        self.send_response(300)
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write(self.robot.status.encode())
@@ -152,37 +155,32 @@ class SimpleHandler(BaseHTTPRequestHandler,):
 class RunRobot:
     def __init__(self):
         self.prot=""
-        self.status="Robot not initialized"
+        self.status="IDLE"
         self.deck_plan={1:"Deck not initialized"}
     def sele(self,name):
         self.prot = name
     def initialize(self,jsondata):
-        if jsondata["protocol"]["file"]=="saliva_to_dtt":
-            self.prot=saliva_to_dtt
-            # self.sele('saliva_to_dtt')
-        elif jsondata["protocol"]["file"]=="sample_to_lamp_96well":
-            # self.sele('sample_to_lamp_96well')
-            self.prot=sample_to_lamp_96well
-        elif jsondata["protocol"]["file"]=="p200_aliquot":
-            # self.sele('sample_to_lamp_96well')
+        if jsondata["protocol"]["file"]=="p200_aliquot":
             self.prot=p200_aliquot
-        if not jsondata["robot_status"]["initialized"]:
+            # self.status = "Initializing"
             self.prot.initialize_robot(**jsondata)
-            print ("opentron initialized")
-            self.status = "Robot Initialized"
+            # print ("opentron initialized")
+            # self.status = "Initialization FINISHED"
+    #         time.sleep(1)
+    #         self.status = "Initialized" # This is to remove the FINISHED, which is used in opentron APP
     def run(self,jsondata):
         if jsondata["robot_status"]["to_run"]:
+            # self.status = "Running"
             self.prot.run(**jsondata)
-            self.status = "Run finished"
+            # self.status = "Run FINISHED"
+            # time.sleep(1)
+            # self.status = "Run done" # This is to remove the FINISHED, which is used in opentron APP
     def pause(self):
         self.prot.pause_robot()
         self.status = "Run Paused"
     def resume(self):
         self.prot.resume_robot()
 
-    def get_status(self):
-        self.status=self.prot.status
-        self.status = "Run Resumed"
 
 
 def startserver():
@@ -207,9 +205,21 @@ while True:
     to_do= msq.get()
     jsondata =msq.get()
     if to_do =="initialize":
-        robot.initialize(jsondata)
+        robot.status="BUSY"
+        try:
+            robot.initialize(jsondata)
+            robot.status="IDLE"
+        except Exception as e:
+            print (e)
+            robot.status="Robot Error"
     elif to_do =="run":
-        robot.run(jsondata)
+        robot.status="BUSY"
+        try:
+            robot.run(jsondata)
+            robot.status="IDLE"
+        except Exception as e:
+            print (e)
+            robot.status="Robot Error"
     elif to_do=="pause":
         robot.pause()
     elif to_do=="resume":

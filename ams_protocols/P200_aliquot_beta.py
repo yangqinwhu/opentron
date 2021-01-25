@@ -208,7 +208,7 @@ def test_run_p20():
     aliquot_dtt_p20(**run_param)
 
 #
-test_run_p20()
+# test_run_p20()
 # while r.statusQ.not_empty:
 #     print (r.statusQ.get())
 #     time.sleep(0.1)

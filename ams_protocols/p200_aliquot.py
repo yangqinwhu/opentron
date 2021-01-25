@@ -7,7 +7,7 @@ If you need to control gpios, first stop the robot server with systemctl stop op
 from opentrons import protocol_api
 # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
 import json,timeit,time
-import common_task_beta as ct
+import common_task as ct
 import importlib
 import sys,json
 sys.path.append("/var/lib/jupyter/notebooks")
