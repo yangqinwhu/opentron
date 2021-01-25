@@ -52,7 +52,7 @@
     "dest_name": "nest_96_wellplate_100ul_pcr_full_skirt",
     "dest_slots": [
       "2",
-      "4",
+      "4"
     ],
     "tm_name": "nest_96_wellplate_2ml_deep",
     "temp_module_slot": [
