@@ -709,7 +709,7 @@ class DTTPage(RunPage):
 class LAMPPage(RunPage):
     config="sampleToLamp_96well"
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
-    basic=["target_columns","rp4","start_tip","start_tube"]
+    basic=["target_columns","start_tip"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -721,7 +721,7 @@ class AliquotDTTPage(RunPage):
     # config="aliquotDTT_p100"
     config="aliquotDTTP20_tm"
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
-    basic=["target_columns","start_tip","start_tube"]
+    basic=["target_columns","start_tip"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -731,7 +731,7 @@ class AliquotDTTPage(RunPage):
 class AliquotLAMPPage(RunPage):
     config="aliquotLampP20_tm"
     # config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
-    basic=["target_columns","start_tip","lamp_wells","src_vol"]
+    basic=["target_columns","start_tip"]
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
