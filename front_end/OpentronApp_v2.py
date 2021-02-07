@@ -382,7 +382,7 @@ class HomePage(tk.Frame):
             self.page_4=tk.Button(master,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
                 x=420,y=210,height=150,width=360)
         elif page==2:
-            self.page_1=tk.Button(master,text='Aliquot LAMP no NBC \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPNoNBCPage')).place(
+            self.page_1=tk.Button(master,text='Aliquot LAMP no NBC \n P20 Temp Deck',font=('Arial',20),command=lambda:self.master.showPage('AliquotLAMPNoNBCPage')).place(
                 x=20,y=40,height=150,width=360)
 
 
