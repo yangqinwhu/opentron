@@ -36,7 +36,7 @@ def run(protocol):
         multi_pipette = protocol.load_instrument(left_pip_name, 'left', tip_racks=p200_tips)
     elif cali_p20:
         p20_tip_name = "opentrons_96_filtertiprack_20ul"
-        p20_tip_slots = ["1"]
+        p20_tip_slots = ["7"]
         p20_tips = [protocol.load_labware(p20_tip_name, slot) for slot in p20_tip_slots]
         right_pip_name = "p20_multi_gen2"
         multi_pipette = protocol.load_instrument(right_pip_name, 'right', tip_racks=p20_tips)
@@ -44,11 +44,11 @@ def run(protocol):
 
     plate_slot ="6"
     rack_slots = ["3"]
-    trash_slot="5"
+    trash_slot="9"
     liquid_trash_rack=json.loads(amsliquidtrash)
     saliva_rack = json.loads(ams2401)
     saliva_rack_10ml = json.loads(ams2402)
-    saliva_rack_10ml_slots = ["9"]
+    saliva_rack_10ml_slots = ["5"]
     plate_name = json.loads(geb_96_wellplate)
     # saliva_rack = json.loads(biobank_96well_saliva_1000ul)
     saliva_rack = json.loads(micronic_96_wellplate_1400ul)
@@ -66,6 +66,7 @@ def run(protocol):
     dest_plate = protocol.load_labware_from_definition(plate_name, plate_slot)
     dest_plate_2=protocol.load_labware('nest_96_wellplate_100ul_pcr_full_skirt',11)
     dest_plate_3=protocol.load_labware('nest_96_wellplate_2ml_deep',4)
+    dest_plate_4=protocol.load_labware('usatall_12_reservoir_22000ul',2)
     trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
     multi_pipette.trash_container = trash
 
@@ -76,10 +77,12 @@ def run(protocol):
     d = dest_plate.rows()[0][0]
     d2 = dest_plate_2.rows()[0][0]
     d3 = dest_plate_3.rows()[0][0]
+    d4 = dest_plate_4.rows()[0][0]
     # multi_pipette.drop_tips() if multi_pipette.has_tip else 1
     # multi_pipette.pick_up_tip()
     multi_pipette.transfer(20,s,d)
     multi_pipette.transfer(20,s1,d)
     multi_pipette.transfer(20,s1,d2)
     multi_pipette.transfer(20,s1,d3)
+    multi_pipette.transfer(20,s1,d4)
     # multi_pipette.drop_tips()

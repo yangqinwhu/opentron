@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": "../../../../Aptitude/scripts/Hui/pstrace_monitor-master"
 		},
 		{
-			"path": "../../../../Aptitude/scripts/Hui/pstrace_monitor-master"
+			"path": ".."
 		}
 	],
 	"settings": {}

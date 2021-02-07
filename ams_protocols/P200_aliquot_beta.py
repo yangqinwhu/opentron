@@ -3,7 +3,6 @@ Disp: Same reagent dispense to mutiple wells without change tip. Current setting
 Use lamp_setup_app.py to calibrate all labware first
 If you need to control gpios, first stop the robot server with systemctl stop opentrons-robot-server. Until you restart the server with systemctl start opentrons-robot-server, you will be unable to control the robot using the Opentrons app.
 """
-
 from opentrons import protocol_api
 # This returns the same kind of object - a ProtocolContext - that is passed into your protocol’s run function when you upload your protocol in the Opentrons App
 import json,timeit,time
@@ -68,6 +67,10 @@ def aliquot_dtt_p20(**kwarg):
 def aliquot_lamp_p20(**kwarg):
     r.aliquot_lamp_p20(**_conca_param(**kwarg))
 
+@prot_deco
+def aliquot_lamp_p20_noNBC(**kwarg):
+    r.aliquot_lamp_p20_noNBC(**_conca_param(**kwarg))
+
 def deactivate_tm():
     r.robot.tm_deck.deactivate()
 
@@ -85,6 +88,8 @@ def run(**kwarg):
         aliquot_dtt_p20(**kwarg)
     elif kwarg["protocol"]["run"]=="aliquotLampP20":
         aliquot_lamp_p20(**kwarg)
+    elif kwarg["protocol"]["run"]=="aliquotLampP20noNBC":
+        aliquot_lamp_p20_noNBC(**kwarg)
     elif kwarg["protocol"]["run"]=="set_temp":
         set_temp()
     elif kwarg["protocol"]["run"]=="deactivate_tm":
@@ -161,7 +166,7 @@ def test_run_p20():
             "tm_temp":4,
         },
         "sample_info":{
-            "target_columns":7,
+            "target_columns":3,
             "target_plates":1,
             "samples":8,
             "sample_per_column":8,
@@ -177,7 +182,7 @@ def test_run_p20():
             "samp_vol":5,
             "reverse_vol":5,
             "src_vol":350,
-            "rp4":0,
+            "rp4":1,
             "air_vol": 0,
             "disp":1,
             "asp_bottom":11,
@@ -194,22 +199,29 @@ def test_run_p20():
             "tip_slots":["7","8"],
             "pip_name":"p20_multi_gen2",
             "pip_location":"right",
-            "trash_slots":[],
+            "trash_slots":["9","6"],
             "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
-            "src_slots": ["6"],
+            "src_slots": ["5"],
             "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-            "dest_slots":["1","2","3","4","5"],
+            "dest_slots":["1","2","3","4"],
             "tm_name":'nest_96_wellplate_100ul_pcr_full_skirt',
             "temp_module_slot": ["10"],
         }
     }
 
     initialize_robot(**run_param)
+    # aliquot_lamp_p20_noNBC(**run_param)
+    # sample_to_lamp(**run_param)
+    aliquot_lamp_p20(**run_param)
     aliquot_dtt_p20(**run_param)
+    
 
 #
-# test_run_p20()
+
 # while r.statusQ.not_empty:
 #     print (r.statusQ.get())
 #     time.sleep(0.1)
 #     continue
+
+if __name__ == "__main__":
+    test_run_p20()
