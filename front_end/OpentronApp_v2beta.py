@@ -358,20 +358,20 @@ class HomePage(tk.Frame):
     def create_bottom(self):
         master=self.BottomFrame
         tk.Button(master,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
-            x=340,y=0,height=50,width=120)   
+            x=340,y=0,height=50,width=120)
         self.back_btn=tk.Button(master,text='<<',font=('Arial',30),state=tk.DISABLED,command=self.get_page_1)
         self.back_btn.place(
             x=280,y=0,height=50,width=50)
         self.fwd_btn=tk.Button(master,text='>>',font=('Arial',30),command=self.get_page_2)
         self.fwd_btn.place(
-            x=470,y=0,height=50,width=50)     
+            x=470,y=0,height=50,width=50)
 
     def create_top(self,page=1):
-        master=self.TopFrame   
+        master=self.TopFrame
         master.destroy()
         self.TopFrame=tk.Frame(self)
         self.TopFrame.place(x=0,y=0,height=380,width=800)
-        master=self.TopFrame 
+        master=self.TopFrame
         if page==1:
             self.page_1=tk.Button(master,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('DTTPage')).place(
                 x=20,y=40,height=150,width=360)

@@ -94,8 +94,8 @@ sample_to_lamp_96well={
         "disp_bottom":0.5,
         'mix':0,
         'returnTip':False,
-        "aspirate_rate": 4,
-        "dispense_rate": 7.6,
+        "aspirate_rate": 5,
+        "dispense_rate": 5,
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
@@ -291,8 +291,8 @@ aliquot_p20_lamp_tm={
         "disp_bottom":0.5,
         "disp":1,
         'returnTip':False,
-        "aspirate_rate": 7.6,
-        "dispense_rate": 7.6,
+        "aspirate_rate": 5,
+        "dispense_rate": 5,
         "tip_press_increment":0.3,
         "tip_presses" : 1,
     },
@@ -325,7 +325,7 @@ class OpentronApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.pages = {}
-        for F in (HomePage,DTTPage,LAMPPage,AliquotDTTPage,AliquotLAMPPage):
+        for F in (HomePage,DTTPage,LAMPPage,AliquotDTTPage,AliquotLAMPPage,AliquotLAMPNoNBCPage):
              self.pages[F.__name__] = F(parent=container,master=self)
              self.pages[F.__name__].grid(row=0, column=0, sticky="nsew")
 
@@ -342,19 +342,62 @@ class HomePage(tk.Frame):
     def __init__(self,parent,master):
         super().__init__(parent)
         self.master = master
+        self.create_frames()
         self.create_widgets()
 
+    def create_frames(self):
+        self.BottomFrame = tk.Frame(self)
+        self.BottomFrame.place(x=0,y=380,height=100,width=800)
+        self.TopFrame = tk.Frame(self)
+        self.TopFrame.place(x=0,y=0,height=380,width=800)
+
     def create_widgets(self):
-        tk.Button(self,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('DTTPage')).place(
-            x=20,y=40,height=150,width=360)
-        tk.Button(self,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
-            x=420,y=40,height=150,width=360)
-        tk.Button(self,text='Aliquot DTT \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
-            x=20,y=210,height=150,width=360)
-        tk.Button(self,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
-            x=420,y=210,height=150,width=360)
-        tk.Button(self,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
-            x=340,y=380,height=50,width=120)
+        self.create_bottom()
+        self.create_top()
+
+    def create_bottom(self):
+        master=self.BottomFrame
+        tk.Button(master,text='Exit',font=('Arial',30),command=self.master.on_closing).place(
+            x=340,y=0,height=50,width=120)
+        self.back_btn=tk.Button(master,text='<<',font=('Arial',30),state=tk.DISABLED,command=self.get_page_1)
+        self.back_btn.place(
+            x=280,y=0,height=50,width=50)
+        self.fwd_btn=tk.Button(master,text='>>',font=('Arial',30),command=self.get_page_2)
+        self.fwd_btn.place(
+            x=470,y=0,height=50,width=50)
+
+    def create_top(self,page=1):
+        master=self.TopFrame
+        master.destroy()
+        self.TopFrame=tk.Frame(self)
+        self.TopFrame.place(x=0,y=0,height=380,width=800)
+        master=self.TopFrame
+        if page==1:
+            self.page_1=tk.Button(master,text='Saliva to DTT\n 96 well\n P300',font=('Arial',30),state=tk.DISABLED,command=lambda:self.master.showPage('DTTPage')).place(
+                x=20,y=40,height=150,width=360)
+            self.page_2=tk.Button(master,text='Sample to LAMP \n P20',font=('Arial',30),command=lambda:self.master.showPage('LAMPPage')).place(
+                x=420,y=40,height=150,width=360)
+            self.page_3=tk.Button(master,text='Aliquot DTT \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
+                x=20,y=210,height=150,width=360)
+            self.page_4=tk.Button(master,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
+                x=420,y=210,height=150,width=360)
+        elif page==2:
+            self.page_1=tk.Button(master,text='Aliquot LAMP no NBC \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPNoNBCPage')).place(
+                x=20,y=40,height=150,width=360)
+
+
+    def get_page_1(self):
+        self.create_top(page=1)
+        self.back_btn.config(state=tk.DISABLED)
+        self.fwd_btn.config(state=tk.NORMAL)
+
+    def get_page_2(self):
+        self.create_top(page=2)
+        self.back_btn.config(state=tk.NORMAL)
+        self.fwd_btn.config(state=tk.DISABLED)
+
+
+
 
     def showPage(self):
         self.tkraise()
@@ -641,13 +684,13 @@ class RunPage(tk.Frame):
             try:
                 url=self.robot_url+'/get_status'
                 res=requests.get(url,json={})
-                self.frm_txt.insert(tk.END,f"{res.text}\n")
-                self.frm_txt.see(tk.END)
+                # self.frm_txt.insert(tk.END,f"{res.text}\n")
+                # self.frm_txt.see(tk.END)
                 self.robot_status.set(res.text)
             except Exception as e:
                 st="No Server"
-                self.frm_txt.insert(tk.END,f"{st}\n")
-                self.frm_txt.see(tk.END)
+                # self.frm_txt.insert(tk.END,f"{st}\n")
+                # self.frm_txt.see(tk.END)
                 self.robot_status.set(st)
                 self.initialized=0
             self.config_side_buttons()
@@ -721,7 +764,7 @@ class AliquotDTTPage(RunPage):
     # config="aliquotDTT_p100"
     config="aliquotDTTP20_tm"
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
-    basic=["target_columns","start_tip"]
+    basic=["target_columns","target_plates","start_tip"]
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
     else:
@@ -730,7 +773,6 @@ class AliquotDTTPage(RunPage):
 
 class AliquotLAMPPage(RunPage):
     config="aliquotLampP20_tm"
-    # config="aliquotDTTP20" ## Temp hack for QC purpose 20200119
     basic=["target_columns","start_tip"]
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
@@ -740,6 +782,16 @@ class AliquotLAMPPage(RunPage):
         defaultParams=json.loads(json.dumps(aliquot_p20_lamp_tm))
     defaultParams["protocol"]["run"]=config.split("_")[0]
 
+class AliquotLAMPNoNBCPage(RunPage):
+    config="aliquotLampP20noNBC_tm"
+    basic=["target_columns","start_tip"]
+    pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
+    if os.path.exists(pp):
+        defaultParams = json.load(open(pp, 'rt'))
+    else:
+        # defaultParams=json.loads(json.dumps(aliquot_p100_96well))
+        defaultParams=json.loads(json.dumps(aliquot_p20_lamp_tm))
+    defaultParams["protocol"]["run"]=config.split("_")[0]
 
 
 
