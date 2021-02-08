@@ -8,7 +8,7 @@ import json,requests,copy
 BOTTON_FONT=16
 LABEL_FONT=8
 server_ip = "127.0.0.1"
-server_ip = "192.168.1.46"
+# server_ip = "192.168.1.46"
 DEV=True if server_ip == "127.0.0.1" else False
 
 
@@ -56,7 +56,7 @@ saliva_to_dtt={
         "tip_slots":["7","8"],
         "pip_name":"p300_multi",
         "pip_location":"left",
-        "trash_slots":["9"],
+        "trash_slots":[],
         "src_name":"micronic_96_wellplate_1400ul",
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
@@ -100,14 +100,14 @@ sample_to_lamp_96well={
         "tip_presses" : 1,
     },
     "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-        "tip_slots":["7","8","11"],
+        "tip_slots":["4","7","8"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":["9"],
+        "trash_slots":[],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["2","4"],
+        "dest_slots":["2","3"],
     }
 }
 
@@ -202,7 +202,7 @@ aliquot_p100_96well={
         "tip_slots":["7","8"],
         "pip_name":"p300_multi",
         "pip_location":"left",
-        "trash_slots":["9"],
+        "trash_slots":[],
         "src_name":"micronic_96_wellplate_1400ul",
         "src_slots": ["1"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
@@ -247,15 +247,15 @@ aliquot_p20_dtt_tm={
         "tip_presses" : 1,
     },
     "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-        "tip_slots":["7","8"],
+        "tip_slots":["4","7"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":["9"],
+        "trash_slots":[],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
-        "src_slots": ["6"],
+        "src_slots": ["11"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["2","4"],
-        "tm_name":'nest_96_wellplate_2ml_deep',
+        "dest_slots":["2","3","5","6","8","9"],
+        "tm_name":'usatall_12_reservoir_22000ul',
         "temp_module_slot": ["10"],
     }
 }
@@ -297,19 +297,18 @@ aliquot_p20_lamp_tm={
         "tip_presses" : 1,
     },
     "deck_param":{"tip_name":"opentrons_96_filtertiprack_20ul",
-        "tip_slots":["7","8"],
+        "tip_slots":["4","7"],
         "pip_name":"p20_multi_gen2",
         "pip_location":"right",
-        "trash_slots":["9"],
+        "trash_slots":[],
         "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
-        "src_slots": ["6"],
+        "src_slots": ["11"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-        "dest_slots":["2","4"],
-        "tm_name":'nest_96_wellplate_2ml_deep',
+        "dest_slots":["2","3","5","6","8","9"],
+        "tm_name":'usatall_12_reservoir_22000ul',
         "temp_module_slot": ["10"],
     }
 }
-
 
 class OpentronApp(tk.Tk):
     def __init__(self):

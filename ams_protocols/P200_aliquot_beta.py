@@ -166,8 +166,8 @@ def test_run_p20():
             "tm_temp":4,
         },
         "sample_info":{
-            "target_columns":3,
-            "target_plates":1,
+            "target_columns":4,
+            "target_plates":2,
             "samples":8,
             "sample_per_column":8,
             "total_batch":1,
@@ -210,10 +210,10 @@ def test_run_p20():
     }
 
     initialize_robot(**run_param)
-    # aliquot_lamp_p20_noNBC(**run_param)
+    aliquot_lamp_p20_noNBC(**run_param)
     # sample_to_lamp(**run_param)
-    aliquot_lamp_p20(**run_param)
-    aliquot_dtt_p20(**run_param)
+    # aliquot_lamp_p20(**run_param)
+    # aliquot_dtt_p20(**run_param)
     
 
 #

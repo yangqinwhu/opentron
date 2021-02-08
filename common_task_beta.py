@@ -105,7 +105,6 @@ class RobotClass:
             self.trash = [self.protocol.load_labware_from_definition(liquid_trash_rack,slot) for slot in self.trash_slots]
             self.multi_pipette.pipette.trash_container=self.trash[0]
 
-
 class PipetteClass:
     def __init__(self,pipette,status):
         self.pipette=pipette
@@ -175,7 +174,7 @@ class PipetteClass:
         if simulate:
             try:
                 self.pipette.pick_up_tip(location=tip_location,presses=tip_presses, increment=tip_press_increment)
-                self._log_time(st,event = 'Pick up tip') if get_time else 1
+                self._log_time(st,event = f'Pick up tip from {tip_location}') if get_time else 1
             except:
                 pass
         else:
@@ -183,7 +182,7 @@ class PipetteClass:
                 pass
             else:
                 self.pipette.pick_up_tip(location=tip_location,presses=tip_presses, increment=tip_press_increment)
-                self._log_time(st,event = 'Pick up tip') if get_time else 1
+                self._log_time(st,event = f'Pick up tip from {tip_location}') if get_time else 1
 
 
     def p_transfer(self,s,d, b = 0,samp_vol= 50,air_vol = 0,mix=0, buffer_vol = 0,returnTip = False,
@@ -204,6 +203,7 @@ class PipetteClass:
         start = timeit.default_timer()
         self._pickup_tip(simulate=simulate,**kwarg)
         
+        st = timeit.default_timer()
         st = timeit.default_timer() if get_time else st
         if buffer_vol !=0:
             self.pipette.aspirate(buffer_vol, location = b.bottom(2))
@@ -321,13 +321,17 @@ class RunRobot(RobotClass):
         self.next_destplate=self.current_destplate+1
 
     def init_well(self,start_tube=1,start_dest=1,**kwarg):
+        start_tube=min(start_tube,12)
+        start_dest=min(start_dest,12)
         self.current_srctube=start_tube-1
         self.current_desttube=start_dest-1
 
     def init_pipette(self,start_tip=1,**kwarg):
-        self.current_tip=start_tip-1
+        start_tip=min(start_tip,12)
         self.mp.pipette.reset_tipracks()
-        self.mp.pipette.starting_tip=self.robot.tips[0].rows()[0][start_tip-1]
+        self.current_tip=start_tip-1
+        self.current_tip_rack=0
+        self.mp.pipette.starting_tip=self.robot.tips[self.current_tip_rack].rows()[0][start_tip-1]
 
     def init_tm(self,**kwarg):
         if "tm" in kwarg.keys():
@@ -363,6 +367,12 @@ class RunRobot(RobotClass):
 
     def _update_one(self,c,n):
         return n,n+1
+
+    def _update_tip(self):
+        self.current_tip+=1
+        if self.current_tip>11:
+            self.current_tip=0
+            self.current_tip_rack+=1
 
     def _src_empty(self,trans_v,src_vol=150,**kwarg):
         pass
@@ -482,7 +492,7 @@ class RunRobot(RobotClass):
         kwarg.update({"disp_pausetime":2})
         # self.src_vol=kwarg["src_vol"]
         # self.src_remaining_vol=self.src_vol
-        for p in range(0,target_plates):
+        for _ in range(0,target_plates):
             self._one_dtt_plate(**kwarg)
             self.current_destplate+=1
             self.current_desttube=kwarg["start_dest"]-1
@@ -516,31 +526,49 @@ class RunRobot(RobotClass):
 
     def _one_lamp_plate_noNBC(self,well_list=[3],target_columns=1,**kwarg):
         """This method add lamp mix to the target_columns. 
-        For the last control column, it will take liquid from D to H, then dispense into A to E  
+        For the last control column, it will take tips from D to H, then dispense into A to E  
         """
         self.current_srctube = well_list[0]-1
         self.current_desttube=0
+        kwarg.update({"reverse_pip":1})
         for i in range(0,target_columns):
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
             chgTip=1 if i==target_columns-1 else 0
             kwarg.update({"chgTip":chgTip})
             self.mp.p_transfer(s,d,**kwarg)
+            if chgTip:
+                self._update_tip()
             kwarg.update({"reverse_pip":0})
             self.current_desttube+=1
-        s=self.robot.src_plates[self.current_srcplate].rows()[3][self.current_srctube]
+        s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
         d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
+        t= self.mp.pipette.starting_tip=self.robot.tips[self.current_tip_rack].rows()[3][self.current_tip]
         kwarg.update({"chgTip":1})
         kwarg.update({"reverse_pip":1})
+        kwarg.update({"tip_location":t})
         self.mp.p_transfer(s,d,**kwarg)
+        self._update_tip()
+    
 
-    def aliquot_lamp_p20_noNBC(self,n7_wells="3,5",rp4_wells="7,9",**kwarg):
+    def _one_lamp_n7_rp4_p20_noNBC(self,n7_wells="3,5",rp4_wells="7,9",**kwarg):
+        if not kwarg["simulate"]:
+            kwarg.update({"asp_pausetime":3})
+            kwarg.update({"disp_pausetime":3})
         n7_l=[int(i) for i in n7_wells.split(",")][:1]
         self._one_lamp_plate_noNBC(n7_l,**kwarg)
         rp4_l=[int(i) for i in rp4_wells.split(",")][:1]
         if rp4_l[0]>0:
             self.current_destplate+=1
             self._one_lamp_plate_noNBC(rp4_l,**kwarg)
+
+    def aliquot_lamp_p20_noNBC(self,target_plates=1,**kwarg):
+        for _ in range(0,target_plates):
+            self._one_lamp_n7_rp4_p20_noNBC(**kwarg)
+            self.current_destplate+=1
+            self.current_desttube=kwarg["start_dest"]-1
+
+        
 
 
 
