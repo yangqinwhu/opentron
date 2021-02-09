@@ -8,7 +8,7 @@ import json,requests,copy
 BOTTON_FONT=16
 LABEL_FONT=8
 server_ip = "127.0.0.1"
-# server_ip = "192.168.1.46"
+server_ip = "192.168.1.46"
 DEV=True if server_ip == "127.0.0.1" else False
 
 
@@ -378,10 +378,10 @@ class HomePage(tk.Frame):
                 x=420,y=40,height=150,width=360)
             self.page_3=tk.Button(master,text='Aliquot DTT \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotDTTPage')).place(
                 x=20,y=210,height=150,width=360)
-            self.page_4=tk.Button(master,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
+            self.page_4=tk.Button(master,text='Aliquot LAMP no NBC \n P20 Temp Deck',font=('Arial',20),command=lambda:self.master.showPage('AliquotLAMPNoNBCPage')).place(
                 x=420,y=210,height=150,width=360)
         elif page==2:
-            self.page_1=tk.Button(master,text='Aliquot LAMP no NBC \n P20 Temp Deck',font=('Arial',20),command=lambda:self.master.showPage('AliquotLAMPNoNBCPage')).place(
+            self.page_1=tk.Button(master,text='Aliquot LAMP \n P20 Temp Deck',font=('Arial',30),command=lambda:self.master.showPage('AliquotLAMPPage')).place(
                 x=20,y=40,height=150,width=360)
 
 
@@ -772,7 +772,7 @@ class AliquotDTTPage(RunPage):
 
 class AliquotLAMPPage(RunPage):
     config="aliquotLampP20_tm"
-    basic=["target_columns","start_tip"]
+    basic=["target_columns","target_plates","start_tip"]
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))
@@ -783,7 +783,7 @@ class AliquotLAMPPage(RunPage):
 
 class AliquotLAMPNoNBCPage(RunPage):
     config="aliquotLampP20noNBC_tm"
-    basic=["target_columns","start_tip"]
+    basic=["target_columns","target_plates","start_tip"]
     pp=Path(__file__).parent / "defaultRunParam"/ f"{config}.configure"
     if os.path.exists(pp):
         defaultParams = json.load(open(pp, 'rt'))

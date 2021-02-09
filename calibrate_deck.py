@@ -66,7 +66,7 @@ def run(protocol):
     dest_plate = protocol.load_labware_from_definition(plate_name, plate_slot)
     dest_plate_2=protocol.load_labware('nest_96_wellplate_100ul_pcr_full_skirt',11)
     dest_plate_3=protocol.load_labware('nest_96_wellplate_2ml_deep',4)
-    dest_plate_4=protocol.load_labware('usatall_12_reservoir_22000ul',2)
+    dest_plate_4=protocol.load_labware('nesttall_12_reservoir_22000ul',2)
     trash = protocol.load_labware_from_definition(liquid_trash_rack,trash_slot)
     multi_pipette.trash_container = trash
 

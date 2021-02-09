@@ -1,7 +1,7 @@
 {
   "protocol": {
     "file": "p200_aliquot",
-    "run": "aliquotDTTP20"
+    "run": "aliquotLampP20noNBC"
   },
   "robot_status": {
     "initialized": 0,
@@ -13,24 +13,24 @@
     "tm_temp": 4
   },
   "sample_info": {
-    "target_columns": 11,
+    "target_columns": 2,
     "target_plates": 1,
-    "start_tube": 1,
+    "n7_wells": "3,5",
+    "rp4_wells": "7,9",
     "start_dest": 1,
     "start_tip": 1,
     "repl_chg_tip": 0
   },
   "transfer_param": {
-    "samp_vol": 10,
-    "reverse_vol": 5,
-    "src_vol": 100000,
-    "rp4": 0,
+    "samp_vol": 15,
+    "reverse_vol": 3,
+    "src_vol": 350,
     "asp_bottom": 12,
-    "disp_bottom": 0,
+    "disp_bottom": 0.5,
     "disp": 1,
     "returnTip": 0,
-    "aspirate_rate": 7.6,
-    "dispense_rate": 7.6,
+    "aspirate_rate": 5,
+    "dispense_rate": 5,
     "tip_press_increment": 0.3,
     "tip_presses": 1
   },

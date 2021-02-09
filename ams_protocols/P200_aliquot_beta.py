@@ -167,7 +167,7 @@ def test_run_p20():
         },
         "sample_info":{
             "target_columns":4,
-            "target_plates":2,
+            "target_plates":3,
             "samples":8,
             "sample_per_column":8,
             "total_batch":1,
@@ -199,11 +199,11 @@ def test_run_p20():
             "tip_slots":["7","8"],
             "pip_name":"p20_multi_gen2",
             "pip_location":"right",
-            "trash_slots":["9","6"],
+            "trash_slots":[],
             "src_name":'nest_96_wellplate_100ul_pcr_full_skirt',
             "src_slots": ["5"],
             "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
-            "dest_slots":["1","2","3","4"],
+            "dest_slots":["1","2","3","4","6","9"],
             "tm_name":'nest_96_wellplate_100ul_pcr_full_skirt',
             "temp_module_slot": ["10"],
         }
