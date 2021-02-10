@@ -162,12 +162,8 @@ class RunRobot:
     def initialize(self,jsondata):
         if jsondata["protocol"]["file"]=="p200_aliquot":
             self.prot=p200_aliquot
-            # self.status = "Initializing"
             self.prot.initialize_robot(**jsondata)
-            # print ("opentron initialized")
-            # self.status = "Initialization FINISHED"
-    #         time.sleep(1)
-    #         self.status = "Initialized" # This is to remove the FINISHED, which is used in opentron APP
+
     def run(self,jsondata):
         if jsondata["robot_status"]["to_run"]:
             # self.status = "Running"

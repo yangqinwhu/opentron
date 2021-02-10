@@ -8,7 +8,7 @@ import json,requests,copy
 BOTTON_FONT=16
 LABEL_FONT=8
 server_ip = "127.0.0.1"
-server_ip = "192.168.1.46"
+# server_ip = "192.168.1.46"
 DEV=True if server_ip == "127.0.0.1" else False
 
 
@@ -87,7 +87,7 @@ sample_to_lamp_96well={
     },
     "transfer_param":{
         "samp_vol":5,
-        "reverse_vol":5,
+        "reverse_vol":0,
         "rp4":0,
         "air_vol": 0,
         "asp_bottom":1,
@@ -255,7 +255,7 @@ aliquot_p20_dtt_tm={
         "src_slots": ["11"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
         "dest_slots":["2","3","5","6","8","9"],
-        "tm_name":'usatall_12_reservoir_22000ul',
+        "tm_name":'nesttall_12_reservoir_22000ul',
         "temp_module_slot": ["10"],
     }
 }
@@ -305,7 +305,7 @@ aliquot_p20_lamp_tm={
         "src_slots": ["11"],
         "dest_name": 'nest_96_wellplate_100ul_pcr_full_skirt',
         "dest_slots":["2","3","5","6","8","9"],
-        "tm_name":'usatall_12_reservoir_22000ul',
+        "tm_name":'nesttall_12_reservoir_22000ul',
         "temp_module_slot": ["10"],
     }
 }

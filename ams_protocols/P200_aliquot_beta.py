@@ -74,8 +74,8 @@ def aliquot_lamp_p20_noNBC(**kwarg):
 def deactivate_tm():
     r.robot.tm_deck.deactivate()
 
-def set_temp():
-    r.robot.tm_deck.start_set_temperature(4)
+def set_temp(i):
+    r.robot.tm_deck.start_set_temperature(i)
 
 def run(**kwarg):
     if kwarg["protocol"]["run"]=="aliquotDTT":
@@ -91,7 +91,8 @@ def run(**kwarg):
     elif kwarg["protocol"]["run"]=="aliquotLampP20noNBC":
         aliquot_lamp_p20_noNBC(**kwarg)
     elif kwarg["protocol"]["run"]=="set_temp":
-        set_temp()
+        i=kwarg["robot_param"]["tm_temp"]
+        set_temp(i)
     elif kwarg["protocol"]["run"]=="deactivate_tm":
         deactivate_tm()
 

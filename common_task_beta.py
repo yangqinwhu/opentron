@@ -75,7 +75,7 @@ class RobotClass:
         if "tm" in kwarg.keys():
             if len(kwarg["tm"])>1:
                 self.tm_deck = self.protocol.load_module('temperature module', self.temp_module_slot[0])
-                self.tm_deck.start_set_temperature(4)
+                self.tm_deck.start_set_temperature(10)
                 try:
                     self.tm_plate = self.tm_deck.load_labware(self.tm_name)
                 except:
@@ -529,11 +529,23 @@ class RunRobot(RobotClass):
         For the last control column, it will take tips from D to H, then dispense into A to E  
         """
         self.current_srctube = well_list[0]-1
+        s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
+        d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
+        t=self.robot.tips[self.current_tip_rack].rows()[3][self.current_tip]
+        kwarg.update({"chgTip":1})
+        kwarg.update({"reverse_pip":1})
+        kwarg.update({"tip_location":t})
+        self.mp.p_transfer(s,d,**kwarg)
+        self._update_tip()
+
+        
         self.current_desttube=0
         kwarg.update({"reverse_pip":1})
         for i in range(0,target_columns):
             s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
             d=self.robot.dest_plates[self.current_destplate].rows()[0][self.current_desttube]
+            t=self.robot.tips[self.current_tip_rack].rows()[0][self.current_tip]
+            kwarg.update({"tip_location":t})
             chgTip=1 if i==target_columns-1 else 0
             kwarg.update({"chgTip":chgTip})
             self.mp.p_transfer(s,d,**kwarg)
@@ -541,23 +553,17 @@ class RunRobot(RobotClass):
                 self._update_tip()
             kwarg.update({"reverse_pip":0})
             self.current_desttube+=1
-        s=self.robot.src_plates[self.current_srcplate].rows()[0][self.current_srctube]
-        d=self.robot.dest_plates[self.current_destplate].rows()[0][11]
-        t= self.mp.pipette.starting_tip=self.robot.tips[self.current_tip_rack].rows()[3][self.current_tip]
-        kwarg.update({"chgTip":1})
-        kwarg.update({"reverse_pip":1})
-        kwarg.update({"tip_location":t})
-        self.mp.p_transfer(s,d,**kwarg)
-        self._update_tip()
+
     
 
     def _one_lamp_n7_rp4_p20_noNBC(self,n7_wells="3,5",rp4_wells="7,9",**kwarg):
+        """Use 0,0 for RP4 wells if want to by pass RP4"""
         if not kwarg["simulate"]:
             kwarg.update({"asp_pausetime":3})
             kwarg.update({"disp_pausetime":3})
-        n7_l=[int(i) for i in n7_wells.split(",")][:1]
+        n7_l=[int(i) for i in n7_wells.split(",")]
         self._one_lamp_plate_noNBC(n7_l,**kwarg)
-        rp4_l=[int(i) for i in rp4_wells.split(",")][:1]
+        rp4_l=[int(i) for i in rp4_wells.split(",")]
         if rp4_l[0]>0:
             self.current_destplate+=1
             self._one_lamp_plate_noNBC(rp4_l,**kwarg)
@@ -572,11 +578,12 @@ class RunRobot(RobotClass):
 
 
 
-# lamp_wells="3579"
-# a=[int(i) for i in lamp_wells.split(",")]
 #
 #
-# a
+# s=""
+# a=[int(i) for i in s.split(",")]
+
+
 
 #
 # r=RunRobot()
